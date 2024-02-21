@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEngine;
-using PlayerController;
-using PlayrController;
+using UnityEngine.UIElements;
 
 namespace PlayerController.Editor{
 public class PCWindow : EditorWindow
 {
+    private PCGraphView graphView;
+
+#region Initialize
     public static PCWindow Open(){
         PCWindow wnd = GetWindow<PCWindow>();
         wnd.titleContent = new GUIContent("PlayerController");
@@ -24,5 +26,11 @@ public class PCWindow : EditorWindow
         }
         else return false;
     }
+    private void CreateGUI(){
+        graphView = new PCGraphView();
+        graphView.StretchToParentSize();
+        rootVisualElement.Add(graphView);
+    }
+#endregion Initialize
 }
 }
