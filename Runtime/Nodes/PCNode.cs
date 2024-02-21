@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace PlayerController{
-public class PlayerAction : ScriptableObject
+public class PCNode : ScriptableObject
 {
     
 }
