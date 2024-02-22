@@ -11,6 +11,7 @@ public class PCNodeView : Node
     public Port inputPort = null;
     public Port outputPort = null;
     private Color defaultColor = new Color(80f / 255f, 80f / 255f, 80f / 255f);
+    public List<PCEdgeView> transition;
 
 #region Initialize
     public PCNodeView(PCNode node){

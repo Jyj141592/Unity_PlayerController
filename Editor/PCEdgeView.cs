@@ -7,8 +7,9 @@ using UnityEngine.UIElements;
 namespace PlayerController.Editor{
 public class PCEdgeView : Edge
 {
-    public PCEdgeView(){
-        
+    public Transition transition;
+    public PCEdgeView(Transition transition){
+        this.transition = transition;
     }
 }
 }

@@ -41,52 +41,56 @@ public class PCGraphView : GraphView
 #endregion Initialize
 
 #region Load
-public void LoadGraph(PlayerControllerAsset node){
-    ClearGraph();
-    rootNode = CreateNodeView(node);
+    public void LoadGraph(PlayerControllerAsset node){
+        ClearGraph();
+        entryNode = node;
+        rootNode = LoadNodeView(node);
+        foreach(var n in entryNode.nodes){
+            LoadNodeView(n);
+        }
+    }
 
-}
+    public void ClearGraph(){
+        DeleteElements(graphElements.ToList());
+    }
 
-public void ClearGraph(){
-    DeleteElements(graphElements.ToList());
-}
-
+    private PCNodeView LoadNodeView(PCNode node){
+        PCNodeView nodeView = new PCNodeView(node);
+        nodeView.Draw();
+        nodeView.SetPosition(new Rect(node.position,Vector2.zero));
+        AddElement(nodeView);
+        nodeViews.Add(node.guid, nodeView);
+        return nodeView;
+    }
 #endregion Load
 
 #region Create Elements
-private PCNodeView CreateNodeView(PCNode node){
-    PCNodeView nodeView = new PCNodeView(node);
-    nodeView.Draw();
-    nodeView.SetPosition(new Rect(node.position,Vector2.zero));
-    AddElement(nodeView);
-    nodeViews.Add(node.guid, nodeView);
-    return nodeView;
-}
+    private PCNodeView CreateNodeView(System.Type type, Vector2 position){
+        var node = (PCNode) ScriptableObject.CreateInstance(type);
+        node.position = position;
+        node.guid = GUID.Generate().ToString();
+        entryNode.nodes.Add(node);
+        if(!Application.isPlaying){
+            AssetDatabase.AddObjectToAsset(node, entryNode);
+            // Undo Redo
+            //
+            AssetDatabase.SaveAssets();
+        }
+        PCNodeView nodeView = LoadNodeView(node);
 
-private PCNodeView CreateNodeView(System.Type type, Vector2 position){
-    var node = (PCNode) ScriptableObject.CreateInstance(type);
-    PCNodeView nodeView = new PCNodeView(node);
-    node.position = position;
-    node.guid = GUID.Generate().ToString();
-    nodeView.Draw();
-    nodeView.SetPosition(new Rect(position, Vector2.zero));
-    AddElement(nodeView);
-    nodeViews.Add(node.guid, nodeView);
+        return nodeView;
+    }
 
-    return nodeView;
-}
-
-
-public override List<Port> GetCompatiblePorts(Port startPort, NodeAdapter nodeAdapter){
-    List<Port> compatiblePorts = new List<Port>();
-    ports.ForEach(port =>{
-        if(startPort.node == port.node) return;
-        if(startPort == port) return;
-        if(startPort.direction == port.direction) return;
-        compatiblePorts.Add(port);
-    });
-    return compatiblePorts;
-}
+    public override List<Port> GetCompatiblePorts(Port startPort, NodeAdapter nodeAdapter){
+        List<Port> compatiblePorts = new List<Port>();
+        ports.ForEach(port =>{
+            if(startPort.node == port.node) return;
+            if(startPort == port) return;
+            if(startPort.direction == port.direction) return;
+            compatiblePorts.Add(port);
+        });
+        return compatiblePorts;
+    }
 #endregion Create Elements
 
 #region Callbacks
