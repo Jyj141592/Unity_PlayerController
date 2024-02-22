@@ -32,7 +32,7 @@ public class PCWindow : EditorWindow
     [OnOpenAsset]
     public static bool OnOpenAsset(int instanceID, int line){
         Object target = EditorUtility.InstanceIDToObject(instanceID);
-        if(target is EntryNode node){
+        if(target is PlayerControllerAsset node){
             Open(target.name, instanceID);
             return true;
         }
@@ -50,14 +50,14 @@ public class PCWindow : EditorWindow
         overlay = root.Q<VisualElement>("Overlay");
 
         string path = EditorPrefs.GetString(guid);
-        EntryNode entry = AssetDatabase.LoadAssetAtPath<EntryNode>(path);
+        PlayerControllerAsset entry = AssetDatabase.LoadAssetAtPath<PlayerControllerAsset>(path);
         if(entry != null) LoadGraphView(entry);
         else{
             overlay.style.visibility = Visibility.Visible;
         }
     }
 
-    private void LoadGraphView(EntryNode node){
+    private void LoadGraphView(PlayerControllerAsset node){
         graphView?.LoadGraph(node);
     }
 #endregion Initialize

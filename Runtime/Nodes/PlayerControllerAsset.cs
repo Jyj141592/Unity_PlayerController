@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 namespace PlayerController{
 [CreateAssetMenu(fileName = "New PlayerController", menuName = "PlayerController")]
-public class EntryNode : PCNode
+public class PlayerControllerAsset : PCNode
 {
     
 }

@@ -9,7 +9,7 @@ namespace PlayerController.Editor{
 public class PCGraphView : GraphView
 {
     public new class UxmlFactory : UxmlFactory<PCGraphView, GraphView.UxmlTraits>{}
-    public EntryNode entryNode;
+    public PlayerControllerAsset entryNode;
 
 #region Initialize
     public PCGraphView(){
@@ -37,14 +37,14 @@ public class PCGraphView : GraphView
 #endregion Initialize
 
 #region Load
-public void LoadGraph(EntryNode node){
+public void LoadGraph(PlayerControllerAsset node){
     ClearGraph();
     CreateNodeView(node);
-    
+
 }
 
 public void ClearGraph(){
-    
+    DeleteElements(graphElements.ToList());
 }
 
 #endregion Load
@@ -52,11 +52,38 @@ public void ClearGraph(){
 #region Create Elements
 private PCNodeView CreateNodeView(PCNode node){
     PCNodeView nodeView = new PCNodeView(node);
+    nodeView.Draw();
     AddElement(nodeView);
     nodeView.SetPosition(new Rect(0,0,0,0));
     return nodeView;
 }
 
+
+public override List<Port> GetCompatiblePorts(Port startPort, NodeAdapter nodeAdapter){
+    List<Port> compatiblePorts = new List<Port>();
+    ports.ForEach(port =>{
+        if(startPort.node == port.node) return;
+        if(startPort == port) return;
+        if(startPort.direction == port.direction) return;
+        compatiblePorts.Add(port);
+    });
+    return compatiblePorts;
+}
 #endregion Create Elements
+
+#region Callbacks
+
+#endregion Callbacks
+
+#region Utility
+public override void BuildContextualMenu(ContextualMenuPopulateEvent evt) {
+        //base.BuildContextualMenu(evt);
+        if(evt.target is PCNodeView){
+            
+        }
+        Vector2 nodePosition = this.ChangeCoordinatesTo(contentViewContainer, evt.localMousePosition);
+        evt.menu.AppendAction("Make Transition",callback => {},DropdownMenuAction.Status.Disabled );
+    }
+#endregion Utility
 }
 }

@@ -6,6 +6,9 @@ using UnityEngine;
 namespace PlayerController.Editor{
 public static class PCEditorUtility
 {
-    public const string prefKey = "PrevTree";
+    public static string NamespaceToClassName(string path){
+        var name = path.Split('.');
+        return name[^1];
+    }
 }
 }
