@@ -12,7 +12,9 @@ public class PCWindow : EditorWindow
     [SerializeField]
     private VisualTreeAsset m_VisualTreeAsset = default;
     private PCGraphView graphView;
-    private InspectorView inspectorView;
+    private InspectorView nodeInspector;
+    private InspectorView edgeInspector;
+    private VisualElement overlay;
     public int instanceID;
     public string guid;
 
@@ -43,13 +45,15 @@ public class PCWindow : EditorWindow
         VisualElement root = rootVisualElement;
         m_VisualTreeAsset.CloneTree(root);
         graphView = root.Q<PCGraphView>();
-        inspectorView = root.Q<InspectorView>();
+        nodeInspector = root.Q<InspectorView>("NodeInspector");
+        edgeInspector = root.Q<InspectorView>("EdgeInspector");
+        overlay = root.Q<VisualElement>("Overlay");
 
         string path = EditorPrefs.GetString(guid);
         EntryNode entry = AssetDatabase.LoadAssetAtPath<EntryNode>(path);
         if(entry != null) LoadGraphView(entry);
         else{
-            // 에셋 사라졌다는 표시 구현하기
+            overlay.style.visibility = Visibility.Visible;
         }
     }
 
@@ -59,7 +63,10 @@ public class PCWindow : EditorWindow
 #endregion Initialize
 
     public void OnSelectionChange() {
-        if(EditorUtility.InstanceIDToObject(instanceID) == null) graphView?.ClearGraph();
+        if(EditorUtility.InstanceIDToObject(instanceID) == null) {
+            graphView?.ClearGraph();
+            overlay.style.visibility = Visibility.Visible;
+        }
     }
 }
 }

@@ -1,11 +1,23 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/PlayerController/Editor/PCWindow.uss?fileID=7433441132597879392&amp;guid=576047209bfaa2b43a640281e00bf501&amp;type=3#PCWindow" />
-    <PlayerController.Editor.SplitView fixed-pane-index="1" fixed-pane-initial-dimension="100" focusable="false" style="flex-wrap: nowrap; flex-direction: column;">
+    <PlayerController.Editor.SplitView fixed-pane-index="1" fixed-pane-initial-dimension="150" focusable="false" style="flex-wrap: nowrap; flex-direction: column;">
         <ui:VisualElement name="left" style="flex-grow: 1;">
             <PlayerController.Editor.PCGraphView focusable="true" style="flex-grow: 1;" />
         </ui:VisualElement>
         <ui:VisualElement name="right" style="flex-grow: 1;">
-            <PlayerController.Editor.InspectorView name="InspectorView" />
+            <PlayerController.Editor.SplitView orientation="Vertical" fixed-pane-initial-dimension="300">
+                <PlayerController.Editor.InspectorView name="NodeInspector">
+                    <ui:Label tabindex="-1" text="Node inspector" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Label" style="max-height: none; font-size: 12px; -unity-text-align: upper-center; padding-top: 0; padding-bottom: 0; color: rgb(229, 229, 229); background-color: rgb(38, 38, 38); margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-right: 0; padding-left: 0;" />
+                </PlayerController.Editor.InspectorView>
+                <PlayerController.Editor.InspectorView name="EdgeInspector">
+                    <ui:Label tabindex="-1" text="Edge Inspector" parse-escape-sequences="true" display-tooltip-when-elided="true" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; font-size: 12px; color: rgb(209, 209, 209); -unity-text-align: upper-center; background-color: rgb(34, 34, 34);" />
+                </PlayerController.Editor.InspectorView>
+            </PlayerController.Editor.SplitView>
         </ui:VisualElement>
     </PlayerController.Editor.SplitView>
+    <ui:VisualElement name="Overlay" style="flex-grow: 1; position: absolute; left: 0; top: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.51); visibility: hidden;">
+        <ui:VisualElement style="flex-grow: 1; max-width: 400px; max-height: 100px; min-width: 400px; min-height: 100px; justify-content: flex-start; align-self: center; align-items: stretch; margin-top: 0; background-color: rgba(200, 3, 3, 0.7); top: 100px; border-top-left-radius: 15px; border-top-right-radius: 15px; border-bottom-right-radius: 15px; border-bottom-left-radius: 15px;">
+            <ui:Label tabindex="-1" text="Missed Asset" parse-escape-sequences="true" display-tooltip-when-elided="true" style="align-self: auto; max-width: 400px; max-height: 100px; min-width: 400px; min-height: 100px; color: rgba(255, 255, 255, 0.7); -unity-text-align: middle-center; font-size: 30px;" />
+        </ui:VisualElement>
+    </ui:VisualElement>
 </ui:UXML>
