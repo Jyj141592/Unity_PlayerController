@@ -4,11 +4,13 @@ using UnityEditor.Callbacks;
 using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEditor.Experimental.GraphView;
+using System.Collections.Generic;
 
 
 namespace PlayerController.Editor{
 public class PCWindow : EditorWindow
 {
+    public static Dictionary<string, PCWindow> openedWnd = new Dictionary<string, PCWindow>();
     [SerializeField]
     private VisualTreeAsset m_VisualTreeAsset = default;
     private PCGraphView graphView;
@@ -16,16 +18,26 @@ public class PCWindow : EditorWindow
     private InspectorView edgeInspector;
     private VisualElement overlay;
     public int instanceID;
-    public string guid;
+    //public string guid;
+    public string path = null;
+    private bool opened = false;
 
 #region Initialize
     public static PCWindow Open(string title, int instanceID){
-        PCWindow wnd = ScriptableObject.CreateInstance<PCWindow>();
-        wnd.titleContent = new GUIContent(title);
-        wnd.guid = GUID.Generate().ToString();
-        wnd.instanceID = instanceID;
         string path = AssetDatabase.GetAssetPath(instanceID);
-        EditorPrefs.SetString(wnd.guid, path);
+        PCWindow wnd;
+        if(openedWnd.ContainsKey(path)){
+            wnd = openedWnd[path];
+            wnd.Focus();
+            return wnd;
+        }
+        wnd = CreateInstance<PCWindow>();
+        wnd.titleContent = new GUIContent(title);
+        //wnd.guid = GUID.Generate().ToString();
+        wnd.instanceID = instanceID;
+        wnd.path = path;
+        openedWnd.Add(path, wnd);
+        //EditorPrefs.SetString(wnd.guid, path);
         wnd.Show();
         return wnd;
     }
@@ -52,7 +64,7 @@ public class PCWindow : EditorWindow
         edgeInspector = root.Q<InspectorView>("EdgeInspector");
         overlay = root.Q<VisualElement>("Overlay");
 
-        string path = EditorPrefs.GetString(guid);
+        //string path = EditorPrefs.GetString(guid);
         PlayerControllerAsset entry = AssetDatabase.LoadAssetAtPath<PlayerControllerAsset>(path);
         if(entry != null) LoadGraphView(entry);
         else{
@@ -74,7 +86,18 @@ public class PCWindow : EditorWindow
     }
 
     public void OnDestroy() {
-        EditorPrefs.DeleteKey(guid);
+        //EditorPrefs.DeleteKey(guid);
+        openedWnd.Remove(path);
+        opened = false;
+    }
+
+    public void OnEnable() {
+        if(!opened){
+            if(path != null){
+                openedWnd.Add(path, this);
+            }
+            opened = true;
+        }
     }
 
     public void OnNodeSelected(PCNodeView nodeView){
