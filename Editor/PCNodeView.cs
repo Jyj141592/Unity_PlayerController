@@ -3,19 +3,21 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine.UIElements;
+using System;
 
 namespace PlayerController.Editor{
 public class PCNodeView : Node
 {
-    private PCNode node;
+    public PCNode node;
     public Port inputPort = null;
     public Port outputPort = null;
     private Color defaultColor = new Color(80f / 255f, 80f / 255f, 80f / 255f);
-    public List<PCEdgeView> transition;
+    public Action<PCNodeView> onNodeSelected;
 
 #region Initialize
-    public PCNodeView(PCNode node){
+    public PCNodeView(PCNode node, Action<PCNodeView> action){
         this.node = node;
+        onNodeSelected = action;
     }
     public void Draw(){
         mainContainer.Remove(titleContainer);
@@ -57,6 +59,14 @@ public class PCNodeView : Node
         port.style.alignSelf = Align.Center;
         return port;
     }
-#endregion Initialize
-}
+        #endregion Initialize
+
+        #region Callbacks
+        public override void OnSelected()
+        {
+            base.OnSelected();
+            onNodeSelected?.Invoke(this);
+        }
+        #endregion Callbacks
+    }
 }

@@ -6,11 +6,11 @@
         </ui:VisualElement>
         <ui:VisualElement name="right" style="flex-grow: 1;">
             <PlayerController.Editor.SplitView orientation="Vertical" fixed-pane-initial-dimension="300">
-                <PlayerController.Editor.InspectorView name="NodeInspector">
-                    <ui:Label tabindex="-1" text="Node inspector" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Label" style="max-height: none; font-size: 12px; -unity-text-align: upper-center; padding-top: 0; padding-bottom: 0; color: rgb(229, 229, 229); background-color: rgb(38, 38, 38); margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-right: 0; padding-left: 0;" />
+                <PlayerController.Editor.InspectorView name="NodeInspector" style="padding-top: 0;">
+                    <ui:Label tabindex="-1" text="Node inspector" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Label" style="max-height: none; font-size: 12px; -unity-text-align: upper-center; padding-top: 0; padding-bottom: 0; color: rgb(229, 229, 229); background-color: rgb(38, 38, 38); margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-right: 0; padding-left: 0; top: auto;" />
                 </PlayerController.Editor.InspectorView>
-                <PlayerController.Editor.InspectorView name="EdgeInspector">
-                    <ui:Label tabindex="-1" text="Edge Inspector" parse-escape-sequences="true" display-tooltip-when-elided="true" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; font-size: 12px; color: rgb(209, 209, 209); -unity-text-align: upper-center; background-color: rgb(34, 34, 34);" />
+                <PlayerController.Editor.InspectorView name="EdgeInspector" style="padding-top: 0;">
+                    <ui:Label tabindex="-1" text="Edge Inspector" parse-escape-sequences="true" display-tooltip-when-elided="true" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; font-size: 12px; color: rgb(209, 209, 209); -unity-text-align: upper-center; background-color: rgb(34, 34, 34); top: auto;" />
                 </PlayerController.Editor.InspectorView>
             </PlayerController.Editor.SplitView>
         </ui:VisualElement>

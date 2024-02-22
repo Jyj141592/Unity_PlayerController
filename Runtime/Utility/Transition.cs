@@ -8,6 +8,8 @@ namespace PlayerController{
 public class Transition
 {
     public PCNode dest;
+
+    public int test;
     public bool canTransition(){
         return false;
     }

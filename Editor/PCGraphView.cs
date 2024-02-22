@@ -5,6 +5,7 @@ using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine.UIElements;
 using System.Reflection;
+using System;
 
 namespace PlayerController.Editor{
 public class PCGraphView : GraphView
@@ -13,6 +14,8 @@ public class PCGraphView : GraphView
     public PlayerControllerAsset entryNode;
     public PCNodeView rootNode;
     public Dictionary<string, PCNodeView> nodeViews;
+    public Action<PCNodeView> onNodeSelected;
+    public Action<PCEdgeView> onEdgeSelected;
 
 #region Initialize
     public PCGraphView(){
@@ -20,6 +23,8 @@ public class PCGraphView : GraphView
         AddStyleSheet("Assets/PlayerController/Editor/PCWindow.uss");
         AddManipulators();
         nodeViews = new Dictionary<string, PCNodeView>();
+        // set callbacks
+        SetOnGraphViewChanged();
     }
     private void CreateGridBackground(){
         GridBackground gridBackground = new GridBackground();
@@ -55,13 +60,18 @@ public class PCGraphView : GraphView
     }
 
     private PCNodeView LoadNodeView(PCNode node){
-        PCNodeView nodeView = new PCNodeView(node);
+        PCNodeView nodeView = new PCNodeView(node, onNodeSelected);
         nodeView.Draw();
         nodeView.SetPosition(new Rect(node.position,Vector2.zero));
         AddElement(nodeView);
         nodeViews.Add(node.guid, nodeView);
         return nodeView;
     }
+
+    // private PCEdgeView LoadEdgeView(Transition transition){
+        
+    //     return new PCEdgeView(transition);
+    // }
 #endregion Load
 
 #region Create Elements
@@ -94,7 +104,18 @@ public class PCGraphView : GraphView
 #endregion Create Elements
 
 #region Callbacks
+// create edge & move elements
+private void SetOnGraphViewChanged(){
+    graphViewChanged = (changes) => {
+        if(changes.edgesToCreate != null){
+            for(int i = 0; i<changes.edgesToCreate.Count;i++){
+                changes.edgesToCreate[i] = new PCEdgeView(changes.edgesToCreate[i], new Transition(), onEdgeSelected);
+            }
+        }
 
+        return changes;
+    };
+}
 #endregion Callbacks
 
 #region Utility

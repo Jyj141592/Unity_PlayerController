@@ -45,6 +45,9 @@ public class PCWindow : EditorWindow
         VisualElement root = rootVisualElement;
         m_VisualTreeAsset.CloneTree(root);
         graphView = root.Q<PCGraphView>();
+        graphView.onNodeSelected = OnNodeSelected;
+        graphView.onEdgeSelected = OnEdgeSelected;
+
         nodeInspector = root.Q<InspectorView>("NodeInspector");
         edgeInspector = root.Q<InspectorView>("EdgeInspector");
         overlay = root.Q<VisualElement>("Overlay");
@@ -62,11 +65,24 @@ public class PCWindow : EditorWindow
     }
 #endregion Initialize
 
+#region Callbacks
     public void OnSelectionChange() {
         if(EditorUtility.InstanceIDToObject(instanceID) == null) {
             graphView?.ClearGraph();
             overlay.style.visibility = Visibility.Visible;
         }
     }
+
+    public void OnDestroy() {
+        EditorPrefs.DeleteKey(guid);
+    }
+
+    public void OnNodeSelected(PCNodeView nodeView){
+        nodeInspector?.UpdateSelection(nodeView);
+    }
+    public void OnEdgeSelected(PCEdgeView edge){
+
+    }
+#endregion Callbacks
 }
 }
