@@ -53,10 +53,17 @@ public class PCGraphView : GraphView
         foreach(var n in entryNode.nodes){
             LoadNodeView(n);
         }
+        LoadEdgeViews(node);
+        foreach(var n in entryNode.nodes){
+            LoadEdgeViews(n);
+        }
     }
 
     public void ClearGraph(){
         DeleteElements(graphElements.ToList());
+        nodeViews.Clear();
+        rootNode = null;
+        entryNode = null;
     }
 
     private PCNodeView LoadNodeView(PCNode node){
@@ -68,13 +75,19 @@ public class PCGraphView : GraphView
         return nodeView;
     }
 
-    // private PCEdgeView LoadEdgeView(Transition transition){
-        
-    //     return new PCEdgeView(transition);
-    // }
+    private void LoadEdgeViews(PCNode node){
+        PCNodeView output = nodeViews[node.guid];
+        foreach(var t in node.transition){
+            PCNodeView input = nodeViews[t.dest.guid];
+            Edge edge = output.outputPort.ConnectTo(input.inputPort);
+            PCEdgeView edgeView = new PCEdgeView(edge, t, onEdgeSelected);
+            AddElement(edgeView);          
+        }       
+    }
 #endregion Load
 
 #region Create Elements
+    // Modifing Asset
     private PCNodeView CreateNodeView(System.Type type, Vector2 position){
         var node = (PCNode) ScriptableObject.CreateInstance(type);
         node.position = position;
@@ -89,6 +102,16 @@ public class PCGraphView : GraphView
         PCNodeView nodeView = LoadNodeView(node);
 
         return nodeView;
+    }
+    // Modifing Asset
+    private Transition AddTransition(PCNodeView input, PCNodeView output){
+        // undo
+        Transition transition = new Transition(input.node);
+        output.node.transition.Add(transition);
+
+        AssetDatabase.SaveAssets();
+
+        return transition;
     }
 
     public override List<Port> GetCompatiblePorts(Port startPort, NodeAdapter nodeAdapter){
@@ -109,7 +132,10 @@ private void SetOnGraphViewChanged(){
     graphViewChanged = (changes) => {
         if(changes.edgesToCreate != null){
             for(int i = 0; i<changes.edgesToCreate.Count;i++){
-                changes.edgesToCreate[i] = new PCEdgeView(changes.edgesToCreate[i], new Transition(), onEdgeSelected);
+                PCNodeView input = changes.edgesToCreate[i].input.node as PCNodeView;
+                PCNodeView output = changes.edgesToCreate[i].output.node as PCNodeView;
+                Transition transition = AddTransition(input, output);
+                changes.edgesToCreate[i] = new PCEdgeView(changes.edgesToCreate[i], transition, onEdgeSelected);
             }
         }
 

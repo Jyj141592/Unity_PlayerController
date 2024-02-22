@@ -9,6 +9,10 @@ public class Transition
 {
     public PCNode dest;
 
+    public Transition(PCNode dest){
+        this.dest = dest;
+    }
+
     public int test;
     public bool canTransition(){
         return false;

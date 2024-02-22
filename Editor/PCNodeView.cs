@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine.UIElements;
 using System;
+using UnityEditor;
 
 namespace PlayerController.Editor{
 public class PCNodeView : Node
@@ -59,14 +60,23 @@ public class PCNodeView : Node
         port.style.alignSelf = Align.Center;
         return port;
     }
-        #endregion Initialize
+#endregion Initialize
 
-        #region Callbacks
-        public override void OnSelected()
-        {
-            base.OnSelected();
-            onNodeSelected?.Invoke(this);
-        }
-        #endregion Callbacks
+#region Callbacks
+    public override void OnSelected()
+    {
+        base.OnSelected();
+        onNodeSelected?.Invoke(this);
     }
+    // Modifing Asset
+    public override void SetPosition(Rect newPos)
+    {
+        base.SetPosition(newPos);
+        // Undo
+        node.position = newPos.position;
+
+        AssetDatabase.SaveAssets();
+    }
+#endregion Callbacks
+}
 }

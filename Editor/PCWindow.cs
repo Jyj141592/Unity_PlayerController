@@ -81,7 +81,7 @@ public class PCWindow : EditorWindow
         nodeInspector?.UpdateSelection(nodeView);
     }
     public void OnEdgeSelected(PCEdgeView edge){
-
+        
     }
 #endregion Callbacks
 }
