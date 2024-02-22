@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace PlayerController{
-public class PCNode : ScriptableObject
+public class SubGraphNode : PCNode
 {
-    public Vector2 position;
-    public string guid;
+    
 }
 }

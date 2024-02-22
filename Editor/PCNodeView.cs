@@ -8,8 +8,8 @@ namespace PlayerController.Editor{
 public class PCNodeView : Node
 {
     private PCNode node;
-    private Port inputPort = null;
-    private Port outputPort = null;
+    public Port inputPort = null;
+    public Port outputPort = null;
     private Color defaultColor = new Color(80f / 255f, 80f / 255f, 80f / 255f);
 
 #region Initialize

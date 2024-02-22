@@ -4,18 +4,22 @@ using UnityEngine;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine.UIElements;
+using System.Reflection;
 
 namespace PlayerController.Editor{
 public class PCGraphView : GraphView
 {
     public new class UxmlFactory : UxmlFactory<PCGraphView, GraphView.UxmlTraits>{}
     public PlayerControllerAsset entryNode;
+    public PCNodeView rootNode;
+    public Dictionary<string, PCNodeView> nodeViews;
 
 #region Initialize
     public PCGraphView(){
         CreateGridBackground();
         AddStyleSheet("Assets/PlayerController/Editor/PCWindow.uss");
         AddManipulators();
+        nodeViews = new Dictionary<string, PCNodeView>();
     }
     private void CreateGridBackground(){
         GridBackground gridBackground = new GridBackground();
@@ -39,7 +43,7 @@ public class PCGraphView : GraphView
 #region Load
 public void LoadGraph(PlayerControllerAsset node){
     ClearGraph();
-    CreateNodeView(node);
+    rootNode = CreateNodeView(node);
 
 }
 
@@ -53,8 +57,22 @@ public void ClearGraph(){
 private PCNodeView CreateNodeView(PCNode node){
     PCNodeView nodeView = new PCNodeView(node);
     nodeView.Draw();
+    nodeView.SetPosition(new Rect(node.position,Vector2.zero));
     AddElement(nodeView);
-    nodeView.SetPosition(new Rect(0,0,0,0));
+    nodeViews.Add(node.guid, nodeView);
+    return nodeView;
+}
+
+private PCNodeView CreateNodeView(System.Type type, Vector2 position){
+    var node = (PCNode) ScriptableObject.CreateInstance(type);
+    PCNodeView nodeView = new PCNodeView(node);
+    node.position = position;
+    node.guid = GUID.Generate().ToString();
+    nodeView.Draw();
+    nodeView.SetPosition(new Rect(position, Vector2.zero));
+    AddElement(nodeView);
+    nodeViews.Add(node.guid, nodeView);
+
     return nodeView;
 }
 
@@ -76,14 +94,34 @@ public override List<Port> GetCompatiblePorts(Port startPort, NodeAdapter nodeAd
 #endregion Callbacks
 
 #region Utility
-public override void BuildContextualMenu(ContextualMenuPopulateEvent evt) {
+    public override void BuildContextualMenu(ContextualMenuPopulateEvent evt) {
         //base.BuildContextualMenu(evt);
-        if(evt.target is PCNodeView){
+        // if(evt.target is PCNodeView node){
+        //     evt.menu.AppendAction("Make Transition",callback => {});
             
-        }
+        // }
         Vector2 nodePosition = this.ChangeCoordinatesTo(contentViewContainer, evt.localMousePosition);
-        evt.menu.AppendAction("Make Transition",callback => {},DropdownMenuAction.Status.Disabled );
+        evt.menu.AppendAction("Add Subgraph node", callback => {
+            CreateNodeView(typeof(SubGraphNode), nodePosition);
+        });
+        var types = TypeCache.GetTypesDerivedFrom<PCNode>();
+        foreach(System.Type type in types){
+            if(type.Equals(typeof(PlayerControllerAsset))) continue;
+            else if(type.Equals(typeof(SubGraphNode))) continue;
+
+            string path = "New node/";
+            var attribute = type.GetCustomAttribute<CreateNodeMenuAttribute>();
+            if(attribute == null){
+                path = path + PCEditorUtility.NamespaceToClassName(type.Name);
+            }
+            else path = path + attribute.path;
+            evt.menu.AppendAction(path, callback => {
+                CreateNodeView(type, nodePosition);
+            });
+        }
     }
+
+
 #endregion Utility
 }
 }
