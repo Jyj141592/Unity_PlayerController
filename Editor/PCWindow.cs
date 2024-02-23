@@ -17,10 +17,10 @@ public class PCWindow : EditorWindow
     private InspectorView nodeInspector;
     private InspectorView edgeInspector;
     private VisualElement overlay;
+    private Button pingAsset;
     public int instanceID;
     //public string guid;
     public string path = null;
-    private bool opened = false;
 
 #region Initialize
     public static PCWindow Open(string title, int instanceID){
@@ -29,6 +29,7 @@ public class PCWindow : EditorWindow
         if(openedWnd.ContainsKey(path)){
             wnd = openedWnd[path];
             wnd.Focus();
+            wnd.SetPositionToRoot();
             return wnd;
         }
         wnd = CreateInstance<PCWindow>();
@@ -39,8 +40,10 @@ public class PCWindow : EditorWindow
         openedWnd.Add(path, wnd);
         //EditorPrefs.SetString(wnd.guid, path);
         wnd.Show();
+        wnd.SetPositionToRoot();
         return wnd;
     }
+
     [OnOpenAsset]
     public static bool OnOpenAsset(int instanceID, int line){
         Object target = EditorUtility.InstanceIDToObject(instanceID);
@@ -63,6 +66,8 @@ public class PCWindow : EditorWindow
         nodeInspector = root.Q<InspectorView>("NodeInspector");
         edgeInspector = root.Q<InspectorView>("EdgeInspector");
         overlay = root.Q<VisualElement>("Overlay");
+        pingAsset = root.Q<Button>();
+        pingAsset.clicked += () => EditorGUIUtility.PingObject(instanceID);
 
         //string path = EditorPrefs.GetString(guid);
         PlayerControllerAsset entry = AssetDatabase.LoadAssetAtPath<PlayerControllerAsset>(path);
@@ -74,6 +79,11 @@ public class PCWindow : EditorWindow
 
     private void LoadGraphView(PlayerControllerAsset node){
         graphView?.LoadGraph(node);
+        SetPositionToRoot();
+    }
+
+    private void SetPositionToRoot(){
+        graphView?.SetPositionToRoot(position.width);
     }
 #endregion Initialize
 
@@ -88,16 +98,12 @@ public class PCWindow : EditorWindow
     public void OnDestroy() {
         //EditorPrefs.DeleteKey(guid);
         openedWnd.Remove(path);
-        opened = false;
     }
 
     public void OnEnable() {
-        if(!opened){
-            if(path != null){
-                openedWnd.Add(path, this);
-            }
-            opened = true;
-        }
+        if(path != null && !openedWnd.ContainsKey(path)){
+            openedWnd.Add(path, this);
+        }        
     }
 
     public void OnNodeSelected(PCNodeView nodeView){

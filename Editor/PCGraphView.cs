@@ -44,6 +44,10 @@ public class PCGraphView : GraphView
         rectangle.target = this;
         this.AddManipulator(rectangle);
     }
+    public void SetPositionToRoot(float wWidth){
+        Vector2 pos = new Vector2(-entryNode.position.x + wWidth / 2, -entryNode.position.y);
+        UpdateViewTransform(pos, Vector3.one);
+    }
 #endregion Initialize
 
 #region Load

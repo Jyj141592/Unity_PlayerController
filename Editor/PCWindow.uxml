@@ -2,16 +2,24 @@
     <Style src="project://database/Assets/PlayerController/Editor/PCWindow.uss?fileID=7433441132597879392&amp;guid=576047209bfaa2b43a640281e00bf501&amp;type=3#PCWindow" />
     <PlayerController.Editor.SplitView fixed-pane-index="1" fixed-pane-initial-dimension="150" focusable="false" style="flex-wrap: nowrap; flex-direction: column;">
         <ui:VisualElement name="left" style="flex-grow: 1;">
-            <PlayerController.Editor.PCGraphView focusable="true" style="flex-grow: 1;" />
+            <PlayerController.Editor.SplitView fixed-pane-initial-dimension="100" fixed-pane-index="0">
+                <ui:VisualElement style="flex-grow: 1;">
+                    <ui:Button text="Ping Asset" parse-escape-sequences="true" display-tooltip-when-elided="true" name="PingAsset" style="height: 25px; margin-top: 2px; margin-right: 5px; margin-bottom: 2px; margin-left: 5px; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; font-size: 15px;" />
+                    <PlayerController.Editor.ParameterView />
+                </ui:VisualElement>
+                <PlayerController.Editor.PCGraphView focusable="true" style="flex-grow: 1;" />
+            </PlayerController.Editor.SplitView>
         </ui:VisualElement>
         <ui:VisualElement name="right" style="flex-grow: 1;">
             <PlayerController.Editor.SplitView orientation="Vertical" fixed-pane-initial-dimension="300">
-                <PlayerController.Editor.InspectorView name="NodeInspector" style="padding-top: 0;">
+                <ui:VisualElement style="flex-grow: 1;">
                     <ui:Label tabindex="-1" text="Node inspector" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Label" style="max-height: none; font-size: 12px; -unity-text-align: upper-center; padding-top: 0; padding-bottom: 0; color: rgb(229, 229, 229); background-color: rgb(38, 38, 38); margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-right: 0; padding-left: 0; top: auto;" />
-                </PlayerController.Editor.InspectorView>
-                <PlayerController.Editor.InspectorView name="EdgeInspector" style="padding-top: 0;">
+                    <PlayerController.Editor.InspectorView name="NodeInspector" style="padding-top: 0;" />
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-grow: 1;">
                     <ui:Label tabindex="-1" text="Edge Inspector" parse-escape-sequences="true" display-tooltip-when-elided="true" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; font-size: 12px; color: rgb(209, 209, 209); -unity-text-align: upper-center; background-color: rgb(34, 34, 34); top: auto;" />
-                </PlayerController.Editor.InspectorView>
+                    <PlayerController.Editor.InspectorView name="EdgeInspector" style="padding-top: 0;" />
+                </ui:VisualElement>
             </PlayerController.Editor.SplitView>
         </ui:VisualElement>
     </PlayerController.Editor.SplitView>
