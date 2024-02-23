@@ -15,7 +15,7 @@ public class PCNodeView : Node
     public Port outputPort = null;
     private Color defaultColor = new Color(80f / 255f, 80f / 255f, 80f / 255f);
     public Action<PCNodeView> onNodeSelected;
-    public bool updated = false;
+    public bool updated = true;
     public bool deleted = false;
     public Func<string, string, string> onNodeNameChanged;
 
@@ -75,7 +75,7 @@ public class PCNodeView : Node
     {
         base.SetPosition(newPos);
         // Undo
-        //Undo.RecordObject(node, "Set Position");
+        Undo.RecordObject(node, "Set Position");
         node.position = newPos.position;
 
         AssetDatabase.SaveAssets();
