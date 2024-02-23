@@ -10,6 +10,7 @@ using System.Collections.Generic;
 namespace PlayerController.Editor{
 public class PCWindow : EditorWindow
 {
+    // prevent opening multiple windows for same asset
     public static Dictionary<string, PCWindow> openedWnd = new Dictionary<string, PCWindow>();
     [SerializeField]
     private VisualTreeAsset m_VisualTreeAsset = default;
