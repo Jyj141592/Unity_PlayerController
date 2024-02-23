@@ -12,5 +12,8 @@ public class TransitionInspector : VisualElement
     public void UpdateInspector(PCEdgeView edge){
 
     }
+    public void Update(){
+        
+    }
 }
 }

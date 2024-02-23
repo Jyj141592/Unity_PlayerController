@@ -6,6 +6,7 @@ using UnityEditor.Experimental.GraphView;
 using UnityEngine.UIElements;
 using System.Reflection;
 using System;
+using System.Linq;
 
 namespace PlayerController.Editor{
 public class PCGraphView : GraphView
@@ -82,13 +83,15 @@ public class PCGraphView : GraphView
 
     private void LoadEdgeViews(PCNode node){
         PCNodeView output = nodeViews[node.guid];
-        foreach(var t in node.transition){
-            PCNodeView input = nodeViews[t.dest.guid];
-            PCEdgeView edgeView = new PCEdgeView(input.inputPort, output.outputPort, t, onEdgeSelected);
-            output.outputPort.Connect(edgeView);
-            input.inputPort.Connect(edgeView);
-            AddElement(edgeView);          
-        }       
+        if(node.transition != null){
+            foreach(var t in node.transition){
+                PCNodeView input = nodeViews[t.dest.guid];
+                PCEdgeView edgeView = new PCEdgeView(input.inputPort, output.outputPort, t, onEdgeSelected);
+                output.outputPort.Connect(edgeView);
+                input.inputPort.Connect(edgeView);
+                AddElement(edgeView);          
+            }     
+        }  
     }
 #endregion Load
 
@@ -134,9 +137,9 @@ public class PCGraphView : GraphView
 
 #region Delete Elements
     // Modify Assets
-    private void DeleteNode(PCNodeView nodeView){
+    private void DeleteNode(PCNodeView nodeView, List<GraphElement> deleteElements){
         // undo
-        DisconnectAll(nodeView);
+        DisconnectAll(nodeView, deleteElements);
         entryNode.nodes.Remove(nodeView.node);
         nodeViews.Remove(nodeView.node.guid);
         if(!Application.isPlaying){
@@ -149,20 +152,21 @@ public class PCGraphView : GraphView
         // undo
         PCNodeView nodeView = edge.output.node as PCNodeView;
         nodeView.node.transition.Remove(edge.transition);
+        nodeView.updated = true;
         AssetDatabase.SaveAssets();
     }
-    private void DisconnectAll(PCNodeView nodeView){
+    private void DisconnectAll(PCNodeView nodeView, List<GraphElement> deleteElements){
         if(nodeView.inputPort != null && nodeView.inputPort.connected){
             foreach(Edge edge in nodeView.inputPort.connections){
                 DeleteEdge(edge as PCEdgeView);
             }
-            DeleteElements(nodeView.inputPort.connections);
+            deleteElements.AddRange(nodeView.inputPort.connections);
         }
         if(nodeView.outputPort != null && nodeView.outputPort.connected){
             foreach(Edge edge in nodeView.outputPort.connections){
                 DeleteEdge(edge as PCEdgeView);
             }
-            DeleteElements(nodeView.outputPort.connections);
+            deleteElements.AddRange(nodeView.outputPort.connections);
         }
     }
 #endregion Delete Elements
@@ -176,6 +180,7 @@ public class PCGraphView : GraphView
                     PCNodeView input = changes.edgesToCreate[i].input.node as PCNodeView;
                     PCNodeView output = changes.edgesToCreate[i].output.node as PCNodeView;
                     Transition transition = AddTransition(input, output);
+                    output.updated = true;
                     changes.edgesToCreate[i] = new PCEdgeView(changes.edgesToCreate[i], transition, onEdgeSelected);
                 }
             }
@@ -197,11 +202,12 @@ public class PCGraphView : GraphView
                 if(element is PCNodeView nodeView){
                     if(nodeView.node is PlayerControllerAsset) continue;
                     else{
-                        DeleteNode(nodeView);
+                        DeleteNode(nodeView, deleteElements);
                     }
                 }
                 deleteElements.Add(element);
             }
+            Debug.Log("selection deletion");
             DeleteElements(deleteElements);
         };
     }

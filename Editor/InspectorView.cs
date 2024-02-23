@@ -6,20 +6,37 @@ using UnityEditor;
 using Unity.VisualScripting.YamlDotNet.Core.Events;
 using UnityEngine;
 using UnityEditor.UIElements;
+using System.Linq;
+using System;
+using UnityEditor.Experimental.GraphView;
 
 namespace PlayerController.Editor{
 public class InspectorView : VisualElement
 {
     public new class UxmlFactory : UxmlFactory<InspectorView, VisualElement.UxmlTraits>{}
     private PCNodeView focused = null;
-    public InspectorView(){}
+    public ScrollView scrollView;
+    public ListView listView;
+
+    private Func<VisualElement> makeItem;
+    private Action<VisualElement, int> bindItem;
+    public TransitionInspector transitionInspector;
+    public InspectorView(){
+        makeItem = () => new Label();
+        bindItem = (e, i) => {
+            Edge edge = focused?.outputPort.connections.ElementAt(i);
+            e.Q<Label>().text = (edge as PCEdgeView).transition.dest.actionName;
+        };
+    }
     public void UpdateInspector(PCNodeView nodeView) {
-        Clear();
+        scrollView.Clear();
+        listView.Clear();
         focused = nodeView;
         SerializedObject obj = new SerializedObject(nodeView.node);
         var fields = nodeView.node.GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
         foreach(var field in fields){
             if(!field.IsPublic && field.GetCustomAttribute<SerializeField>(true) == null) continue;
+            if(field.GetCustomAttribute<HideInInspector>(true) != null) continue;
             if(field.FieldType == typeof(int)){
                 IntegerField intField = new IntegerField(){
                     label = field.Name
@@ -68,9 +85,10 @@ public class InspectorView : VisualElement
                 vector3Field.value = (Vector3) field.GetValue(nodeView.node);
                 SetField(vector3Field, field, obj);
             }
-            
         }
-
+        // Update transition list
+        //listView = SetListView();
+        //Add(listView);
     }
     private void SetField<T>(BaseField<T> field, FieldInfo fieldInfo, SerializedObject obj){
         if(!Application.isPlaying){
@@ -81,7 +99,24 @@ public class InspectorView : VisualElement
                 fieldInfo.SetValue(focused.node, callback.newValue);
             });
         }
-        Add(field);
+        scrollView.Add(field);
+    }
+    private ListView SetListView(){
+
+        ListView listView = new ListView(focused?.outputPort.connections.ToList(), -1,makeItem, bindItem);
+        listView.selectionType = SelectionType.Single;
+        listView.style.paddingLeft = listView.style.paddingRight = 5;
+        listView.style.backgroundColor = new Color(0.4f,0.4f,0.4f);
+        focused.updated = false;
+        return listView;
+    }
+    public void Update(){
+        // if(listView != null && focused != null && focused.updated){
+        //     Remove(listView);
+            
+        //     listView = SetListView();
+        //     Add(listView);
+        // }
     }
 }
 }

@@ -14,6 +14,7 @@ public class PCNodeView : Node
     public Port outputPort = null;
     private Color defaultColor = new Color(80f / 255f, 80f / 255f, 80f / 255f);
     public Action<PCNodeView> onNodeSelected;
+    public bool updated = false;
 
 #region Initialize
     public PCNodeView(PCNode node, Action<PCNodeView> action){

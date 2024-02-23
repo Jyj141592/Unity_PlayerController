@@ -19,6 +19,8 @@ public class PCWindow : EditorWindow
     private TransitionInspector edgeInspector;
     private VisualElement overlay;
     private Button pingAsset;
+    private ScrollView scrollView;
+    private ListView listView;
     public int instanceID;
     //public string guid;
     public string path = null;
@@ -64,8 +66,13 @@ public class PCWindow : EditorWindow
         graphView.onNodeSelected = OnNodeSelected;
         graphView.onEdgeSelected = OnEdgeSelected;
 
-        nodeInspector = root.Q<InspectorView>();
+        scrollView = root.Q<ScrollView>();
+        listView = root.Q<ListView>();
         edgeInspector = root.Q<TransitionInspector>();
+        nodeInspector = root.Q<InspectorView>();
+        nodeInspector.transitionInspector = edgeInspector;
+        nodeInspector.scrollView = scrollView;
+        nodeInspector.listView = listView;
         overlay = root.Q<VisualElement>("Overlay");
         pingAsset = root.Q<Button>();
         pingAsset.clicked += () => EditorGUIUtility.PingObject(instanceID);
@@ -107,11 +114,19 @@ public class PCWindow : EditorWindow
         }        
     }
 
+    public void OnInspectorUpdate() {
+        UpdateInspector();
+    }
+
     public void OnNodeSelected(PCNodeView nodeView){
         nodeInspector?.UpdateInspector(nodeView);
     }
     public void OnEdgeSelected(PCEdgeView edge){
         edgeInspector?.UpdateInspector(edge);
+    }
+    public void UpdateInspector(){
+        nodeInspector.Update();
+        edgeInspector.Update();
     }
 #endregion Callbacks
 }
