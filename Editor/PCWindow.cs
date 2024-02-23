@@ -70,9 +70,7 @@ public class PCWindow : EditorWindow
         listView = root.Q<ListView>();
         edgeInspector = root.Q<TransitionInspector>();
         nodeInspector = root.Q<InspectorView>();
-        nodeInspector.transitionInspector = edgeInspector;
-        nodeInspector.scrollView = scrollView;
-        nodeInspector.listView = listView;
+        nodeInspector.Init(listView, scrollView, edgeInspector);
         overlay = root.Q<VisualElement>("Overlay");
         pingAsset = root.Q<Button>();
         pingAsset.clicked += () => EditorGUIUtility.PingObject(instanceID);

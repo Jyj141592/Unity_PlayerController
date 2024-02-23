@@ -15,13 +15,14 @@ public class PCNodeView : Node
     private Color defaultColor = new Color(80f / 255f, 80f / 255f, 80f / 255f);
     public Action<PCNodeView> onNodeSelected;
     public bool updated = false;
+    public bool deleted = false;
 
 #region Initialize
     public PCNodeView(PCNode node, Action<PCNodeView> action){
         this.node = node;
         onNodeSelected = action;
     }
-    public void Draw(){
+    public void Draw(string titleText){
         mainContainer.Remove(titleContainer);
         topContainer.Remove(inputContainer);
         topContainer.Remove(outputContainer);
@@ -29,19 +30,16 @@ public class PCNodeView : Node
         mainContainer.style.minWidth = 90;
         mainContainer.style.maxWidth = 300;
 
-        string titleText;
         // Create input port
         if(node is not PlayerControllerAsset){
             inputPort = CreatePort(Orientation.Vertical, Direction.Input, Port.Capacity.Multi);
             inputPort.style.marginLeft = 8;
             mainContainer.Insert(0, inputPort);
-            titleText = PCEditorUtility.NamespaceToClassName(node.GetType().ToString());
         }
         else{
             VisualElement element = new VisualElement();
             element.style.height = 20;
             mainContainer.Insert(0, element);
-            titleText = "Entry";
         }
 
         TextElement title = new TextElement(){text = titleText};

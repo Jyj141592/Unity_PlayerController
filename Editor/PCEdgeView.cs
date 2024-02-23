@@ -27,5 +27,11 @@ public class PCEdgeView : Edge
         base.OnSelected();
         onEdgeSelected?.Invoke(this);
     }
+    public override string ToString()
+    {
+        PCNodeView i = input.node as PCNodeView;
+        PCNodeView o = output.node as PCNodeView;
+        return o.node.actionName + " -> " + i.node.actionName;
+    }
 }
 }

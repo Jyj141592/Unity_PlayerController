@@ -15,6 +15,7 @@ public class PCGraphView : GraphView
     public PlayerControllerAsset entryNode;
     public PCNodeView rootNode;
     public Dictionary<string, PCNodeView> nodeViews;
+    public HashSet<string> nodeNames;
     public Action<PCNodeView> onNodeSelected;
     public Action<PCEdgeView> onEdgeSelected;
 
@@ -24,6 +25,7 @@ public class PCGraphView : GraphView
         AddStyleSheet("Assets/PlayerController/Editor/PCWindow.uss");
         AddManipulators();
         nodeViews = new Dictionary<string, PCNodeView>();
+        nodeNames = new HashSet<string>();
         // set callbacks
         SetOnGraphViewChanged();
         SetElementsDeletion();
@@ -68,16 +70,18 @@ public class PCGraphView : GraphView
     public void ClearGraph(){
         DeleteElements(graphElements.ToList());
         nodeViews.Clear();
+        nodeNames.Clear();
         rootNode = null;
         entryNode = null;
     }
 
     private PCNodeView LoadNodeView(PCNode node){
         PCNodeView nodeView = new PCNodeView(node, onNodeSelected);
-        nodeView.Draw();
+        nodeView.Draw(node.actionName);
         nodeView.SetPosition(new Rect(node.position,Vector2.zero));
         AddElement(nodeView);
         nodeViews.Add(node.guid, nodeView);
+        nodeNames.Add(node.actionName);
         return nodeView;
     }
 
@@ -102,6 +106,8 @@ public class PCGraphView : GraphView
         node.position = position;
         node.guid = GUID.Generate().ToString();
         entryNode.nodes.Add(node);
+        node.transition = new List<Transition>();
+        node.actionName = GetUniqueName(PCEditorUtility.NamespaceToClassName(node.GetType().ToString()));
         if(!Application.isPlaying){
             AssetDatabase.AddObjectToAsset(node, entryNode);
             // Undo Redo
@@ -123,6 +129,17 @@ public class PCGraphView : GraphView
         return transition;
     }
 
+    public string GetUniqueName(string name){
+        if(!nodeNames.Contains(name)) return name;
+        string ret;
+        int i = 1;
+        while(true){
+            ret = name + $"({i})";
+            if(!nodeNames.Contains(ret)) break;
+        }
+        return ret;
+    }
+
     public override List<Port> GetCompatiblePorts(Port startPort, NodeAdapter nodeAdapter){
         List<Port> compatiblePorts = new List<Port>();
         ports.ForEach(port =>{
@@ -142,6 +159,8 @@ public class PCGraphView : GraphView
         DisconnectAll(nodeView, deleteElements);
         entryNode.nodes.Remove(nodeView.node);
         nodeViews.Remove(nodeView.node.guid);
+        nodeNames.Remove(nodeView.node.actionName);
+        nodeView.deleted = true;
         if(!Application.isPlaying){
             AssetDatabase.RemoveObjectFromAsset(nodeView.node);
             AssetDatabase.SaveAssets();
@@ -207,7 +226,6 @@ public class PCGraphView : GraphView
                 }
                 deleteElements.Add(element);
             }
-            Debug.Log("selection deletion");
             DeleteElements(deleteElements);
         };
     }

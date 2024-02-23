@@ -7,5 +7,8 @@ public class PlayerControllerAsset : PCNode
 {
     [HideInInspector]
     public List<PCNode> nodes;
+    public PlayerControllerAsset(){
+        actionName = "Entry";
+    }
 }
 }
