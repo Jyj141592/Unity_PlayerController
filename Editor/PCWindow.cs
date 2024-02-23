@@ -16,7 +16,7 @@ public class PCWindow : EditorWindow
     private VisualTreeAsset m_VisualTreeAsset = default;
     private PCGraphView graphView;
     private InspectorView nodeInspector;
-    private InspectorView edgeInspector;
+    private TransitionInspector edgeInspector;
     private VisualElement overlay;
     private Button pingAsset;
     public int instanceID;
@@ -64,8 +64,8 @@ public class PCWindow : EditorWindow
         graphView.onNodeSelected = OnNodeSelected;
         graphView.onEdgeSelected = OnEdgeSelected;
 
-        nodeInspector = root.Q<InspectorView>("NodeInspector");
-        edgeInspector = root.Q<InspectorView>("EdgeInspector");
+        nodeInspector = root.Q<InspectorView>();
+        edgeInspector = root.Q<TransitionInspector>();
         overlay = root.Q<VisualElement>("Overlay");
         pingAsset = root.Q<Button>();
         pingAsset.clicked += () => EditorGUIUtility.PingObject(instanceID);
@@ -108,10 +108,10 @@ public class PCWindow : EditorWindow
     }
 
     public void OnNodeSelected(PCNodeView nodeView){
-        nodeInspector?.UpdateSelection(nodeView);
+        nodeInspector?.UpdateInspector(nodeView);
     }
     public void OnEdgeSelected(PCEdgeView edge){
-        
+        edgeInspector?.UpdateInspector(edge);
     }
 #endregion Callbacks
 }

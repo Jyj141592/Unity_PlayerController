@@ -8,7 +8,7 @@ namespace PlayerController{
 public class Transition
 {
     public PCNode dest;
-
+    public bool mute = false;
     public Transition(PCNode dest){
         this.dest = dest;
     }
