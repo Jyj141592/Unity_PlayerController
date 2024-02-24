@@ -179,7 +179,7 @@ public class PCGraphView : GraphView
         }
     }
     // Modify Assets
-    private void DeleteEdge(PCEdgeView edge){
+    public void DeleteEdge(PCEdgeView edge){
         PCNodeView nodeView = edge.output.node as PCNodeView;
         if(nodeView.node == null) return;
         // undo
@@ -209,7 +209,7 @@ public class PCGraphView : GraphView
 
 #region Callbacks
 // create edge & move elements
-    private GraphViewChange OnGraphChanged(GraphViewChange changes){       
+    private GraphViewChange OnGraphChanged(GraphViewChange changes){   
         if(changes.edgesToCreate != null){
             for(int i = 0; i<changes.edgesToCreate.Count;i++){
                 PCNodeView input = changes.edgesToCreate[i].input.node as PCNodeView;

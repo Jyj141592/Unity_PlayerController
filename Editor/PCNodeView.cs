@@ -95,5 +95,9 @@ public class PCNodeView : Node
         return newName;
     }
 #endregion Callbacks
+
+    public void RemoveEdge(PCEdgeView edge){
+        
+    }
 }
 }

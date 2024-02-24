@@ -8,6 +8,7 @@ using UnityEditor.UIElements;
 using System.Linq;
 using System;
 using UnityEditor.Experimental.GraphView;
+using Unity.VisualScripting;
 
 namespace PlayerController.Editor{
 public class InspectorView : VisualElement
@@ -17,15 +18,19 @@ public class InspectorView : VisualElement
     public ScrollView scrollView;
     public ListView listView;
     public TransitionInspector transitionInspector;
+    private Action<PCEdgeView> removeEdge;
     public InspectorView(){
     }
-    public void Init(ListView listView, ScrollView scrollView, TransitionInspector inspector){
+    public void Init(ListView listView, ScrollView scrollView, TransitionInspector inspector, Action<PCEdgeView> removeEdge){
         this.listView = listView;
         this.scrollView = scrollView;
         transitionInspector = inspector;
         
+        listView.RegisterCallback<KeyDownEvent>(OnKeyDown, TrickleDown.TrickleDown);
         listView.itemIndexChanged += OnItemIndexChanged;
         listView.selectionChanged += OnSelectionChanged;
+
+        this.removeEdge = removeEdge;
         Undo.undoRedoPerformed += ()=> {
             focused = null;
             this.scrollView.Clear();
@@ -127,7 +132,17 @@ public class InspectorView : VisualElement
         
     }
     private void OnSelectionChanged(IEnumerable<object> selectedItems){
-
+        PCEdgeView edge = (PCEdgeView) selectedItems.First();
+        transitionInspector.UpdateInspector(edge);
+    }
+    private void OnKeyDown(KeyDownEvent ev){
+        if(ev.keyCode == KeyCode.Delete){
+            PCEdgeView edge = (PCEdgeView) listView.selectedItem;
+            if(edge != null){
+                removeEdge.Invoke(edge);
+                listView.itemsSource = focused.outputPort.connections.ToList();
+            }
+        }
     }
     public void Update(){
         if(listView != null && focused != null && focused.updated){          
