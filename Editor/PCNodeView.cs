@@ -5,6 +5,7 @@ using UnityEditor.Experimental.GraphView;
 using UnityEngine.UIElements;
 using System;
 using UnityEditor;
+using System.Linq;
 
 namespace PlayerController.Editor{
 public class PCNodeView : Node
@@ -81,6 +82,44 @@ public class PCNodeView : Node
             AssetDatabase.SaveAssets();
     }
 
+    public void MoveTransitionIndex(int from, int to){
+        Undo.RecordObject(node, "Change Transition Order");
+        var list = outputPort.connections.ToList();
+        Edge edge = list[from];
+        Transition transition = node.transition[from];
+        outputPort.DisconnectAll();
+        if(to > from){
+            for(int i = 0; i < from; i++){
+                outputPort.Connect(list[i]);
+            }
+            for(int i = from; i < to; i++){
+                outputPort.Connect(list[i + 1]);
+                node.transition[i] = node.transition[i + 1];
+            }
+            outputPort.Connect(edge);
+            node.transition[to] = transition;
+            for(int i = to + 1; i < list.Count(); i++){
+                outputPort.Connect(list[i]);
+            }
+        }
+        else{
+            for(int i = 0; i < to; i++){
+                outputPort.Connect(list[i]);
+            }
+            outputPort.Connect(edge);
+            for(int i = to + 1; i <= from; i++){
+                outputPort.Connect(list[i - 1]);
+            }
+            for(int i = from; i > to; i--){
+                node.transition[i] = node.transition[i - 1];
+            }
+            node.transition[to] = transition;
+            for(int i = from + 1; i < list.Count(); i++){
+                outputPort.Connect(list[i]);
+            }
+        }
+        AssetDatabase.SaveAssets();
+    }
     
     public string OnNodeNameChanged(string oldVal, string newVal){
         if(nodeTitle.text.Equals(newVal)) return newVal;
@@ -95,9 +134,5 @@ public class PCNodeView : Node
         return newName;
     }
 #endregion Callbacks
-
-    public void RemoveEdge(PCEdgeView edge){
-        
-    }
 }
 }

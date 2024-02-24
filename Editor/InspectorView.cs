@@ -128,10 +128,13 @@ public class InspectorView : VisualElement
         focused.updated = false;
     }
     private void OnItemIndexChanged(int oldVal, int newVal){
-        Debug.Log(oldVal.ToString() + " -> " + newVal.ToString());
-        
+        focused.MoveTransitionIndex(oldVal, newVal);
+        listView.itemsSource = focused.outputPort.connections.ToList();
+        listView.Rebuild();
+        listView.SetSelectionWithoutNotify(new List<int>(){newVal});
     }
     private void OnSelectionChanged(IEnumerable<object> selectedItems){
+        if(selectedItems.Count() <= 0) return;
         PCEdgeView edge = (PCEdgeView) selectedItems.First();
         transitionInspector.UpdateInspector(edge);
     }
