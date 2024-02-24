@@ -125,8 +125,6 @@ public class PCGraphView : GraphView
 
         }
 
-        
-
         PCNodeView nodeView = LoadNodeView(node);
 
         return nodeView;
@@ -199,8 +197,6 @@ public class PCGraphView : GraphView
         Undo.RecordObject(nodeView.node, "Delete Transition");
         SerializedObject obj = new SerializedObject(nodeView.node);
         SerializedProperty property = obj.FindProperty("transition");
-        //int pos = nodeView.node.transition.IndexOf(edge.transition);
-        Debug.Log(pos);
         property.DeleteArrayElementAtIndex(pos);
         obj.ApplyModifiedProperties();
         edge.output.Disconnect(edge);

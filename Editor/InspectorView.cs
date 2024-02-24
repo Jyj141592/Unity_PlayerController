@@ -18,30 +18,34 @@ public class InspectorView : VisualElement
     public ScrollView scrollView;
     public ListView listView;
     public TransitionInspector transitionInspector;
-    private Action<PCEdgeView> removeEdge;
+    private PCGraphView graphView;
+    private PCEdgeView selected = null;
     public InspectorView(){
     }
-    public void Init(ListView listView, ScrollView scrollView, TransitionInspector inspector, Action<PCEdgeView> removeEdge){
+    public void Init(ListView listView, ScrollView scrollView, TransitionInspector inspector,
+     PCGraphView graphView){
         this.listView = listView;
         this.scrollView = scrollView;
         transitionInspector = inspector;
+        this.graphView = graphView;
         
         listView.RegisterCallback<KeyDownEvent>(OnKeyDown, TrickleDown.TrickleDown);
         listView.itemIndexChanged += OnItemIndexChanged;
         listView.selectionChanged += OnSelectionChanged;
-
-        this.removeEdge = removeEdge;
         Undo.undoRedoPerformed += ()=> {
             focused = null;
+            selected = null;
             this.scrollView.Clear();
             this.listView.itemsSource = null;
             this.listView.Rebuild();
         };
+        
     }
     
     public void UpdateInspector(PCNodeView nodeView) {
         scrollView.Clear();
         listView.Clear();
+        selected = null;
         focused = nodeView;
         bool foundName = false;
         SerializedObject obj = new SerializedObject(nodeView.node);
@@ -136,13 +140,16 @@ public class InspectorView : VisualElement
     private void OnSelectionChanged(IEnumerable<object> selectedItems){
         if(selectedItems.Count() <= 0) return;
         PCEdgeView edge = (PCEdgeView) selectedItems.First();
+        if(selected != null) RemoveSelection(selected);
+        selected = edge;
         transitionInspector.UpdateInspector(edge);
+        AddSelection(edge);
     }
     private void OnKeyDown(KeyDownEvent ev){
         if(ev.keyCode == KeyCode.Delete){
             PCEdgeView edge = (PCEdgeView) listView.selectedItem;
             if(edge != null){
-                removeEdge.Invoke(edge);
+                RemoveEdge(edge);
                 listView.itemsSource = focused.outputPort.connections.ToList();
             }
         }
@@ -156,7 +163,23 @@ public class InspectorView : VisualElement
             listView.Rebuild();
             scrollView.Clear();
             focused = null;
+            selected = null;
         }
+    }
+
+    private void AddSelection(PCEdgeView edge){
+        graphView.AddToSelection(edge);
+    }
+
+    private void RemoveEdge(PCEdgeView edge){
+        graphView.DeleteEdge(edge);
+        edge.input.Disconnect(edge);
+        edge.output.Disconnect(edge);
+        graphView.RemoveElement(edge);
+    }
+
+    private void RemoveSelection(PCEdgeView edge){
+        graphView.RemoveFromSelection(edge);
     }
 }
 }
