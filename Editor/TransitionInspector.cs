@@ -10,7 +10,7 @@ public class TransitionInspector : VisualElement
     public TransitionInspector(){}
 
     public void UpdateInspector(PCEdgeView edge){
-
+        Debug.Log(edge);
     }
     public void Update(){
         

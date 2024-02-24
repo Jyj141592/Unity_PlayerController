@@ -17,16 +17,13 @@ public class InspectorView : VisualElement
     private PCNodeView focused = null;
     public ScrollView scrollView;
     public ListView listView;
-    public TransitionInspector transitionInspector;
     private PCGraphView graphView;
     private PCEdgeView selected = null;
     public InspectorView(){
     }
-    public void Init(ListView listView, ScrollView scrollView, TransitionInspector inspector,
-     PCGraphView graphView){
+    public void Init(ListView listView, ScrollView scrollView, PCGraphView graphView){
         this.listView = listView;
         this.scrollView = scrollView;
-        transitionInspector = inspector;
         this.graphView = graphView;
         
         listView.RegisterCallback<KeyDownEvent>(OnKeyDown, TrickleDown.TrickleDown);
@@ -142,7 +139,6 @@ public class InspectorView : VisualElement
         PCEdgeView edge = (PCEdgeView) selectedItems.First();
         if(selected != null) RemoveSelection(selected);
         selected = edge;
-        transitionInspector.UpdateInspector(edge);
         AddSelection(edge);
     }
     private void OnKeyDown(KeyDownEvent ev){
