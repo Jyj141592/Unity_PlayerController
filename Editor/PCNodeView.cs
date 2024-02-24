@@ -17,7 +17,7 @@ public class PCNodeView : Node
     public Action<PCNodeView> onNodeSelected;
     public bool updated = true;
     public bool deleted = false;
-    public Func<string, string, string> onNodeNameChanged;
+    private Func<string, string, string> onNodeNameChanged;
 
 #region Initialize
     public PCNodeView(PCNode node, Action<PCNodeView> action, Func<string, string, string> onNodeNameChanged){
@@ -81,17 +81,19 @@ public class PCNodeView : Node
             AssetDatabase.SaveAssets();
     }
 
-    //
-    // public string OnNodeNameChanged(string oldVal, string newVal){
-    //     string newName = onNodeNameChanged(oldVal, newVal);
-    //     if(newName.Equals(newVal)){
-            
-    //         return newVal;
-    //     }
-    //     else{
-    //         return newName;
-    //     }
-    // }
+    
+    public string OnNodeNameChanged(string oldVal, string newVal){
+        if(nodeTitle.text.Equals(newVal)) return newVal;
+        Undo.RecordObject(node, "Rename Node");
+        string newName = onNodeNameChanged.Invoke(oldVal, newVal);
+        nodeTitle.text = newName;
+        node.actionName = newName;
+
+        if(!Application.isPlaying){
+            AssetDatabase.SaveAssets();
+        }
+        return newName;
+    }
 #endregion Callbacks
 }
 }

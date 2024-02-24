@@ -8,7 +8,6 @@ using UnityEditor.UIElements;
 using System.Linq;
 using System;
 using UnityEditor.Experimental.GraphView;
-using Codice.Client.BaseCommands.Merge.IncomingChanges;
 
 namespace PlayerController.Editor{
 public class InspectorView : VisualElement
@@ -24,9 +23,17 @@ public class InspectorView : VisualElement
         this.listView = listView;
         this.scrollView = scrollView;
         transitionInspector = inspector;
+        
         listView.itemIndexChanged += OnItemIndexChanged;
         listView.selectionChanged += OnSelectionChanged;
+        Undo.undoRedoPerformed += ()=> {
+            focused = null;
+            this.scrollView.Clear();
+            this.listView.itemsSource = null;
+            this.listView.Rebuild();
+        };
     }
+    
     public void UpdateInspector(PCNodeView nodeView) {
         scrollView.Clear();
         listView.Clear();
@@ -62,21 +69,18 @@ public class InspectorView : VisualElement
                         label = field.Name
                     };
                     textField.isDelayed = true;
-                    SetField(textField, field, obj);
                     if(!foundName && field.Name.Equals("actionName")){
-                        //textField.RegisterValueChangedCallback(callback => {
-                            // string newName = nodeView.onNodeNameChanged.Invoke(callback.previousValue, callback.newValue);
-                            // if(!newName.Equals(callback.newValue)){
-                            //     textField.value = newName;
-                            //     nodeView.nodeTitle.text = newName;
-                            // }
-                            // else{
-                            //     nodeView.nodeTitle.text = callback.newValue;
-                            // }
-                        //});
-                        
+                        textField.value = (string) field.GetValue(nodeView.node);
+                        textField.RegisterValueChangedCallback(callback => {
+                            string newName = nodeView.OnNodeNameChanged(callback.previousValue, callback.newValue);
+                            if(!newName.Equals(callback.newValue)){
+                                textField.value = newName;
+                            }
+                        });
+                        scrollView.Add(textField);
                         foundName = true;
                     }
+                    else SetField(textField, field, obj);
                 }
                 else if(field.FieldType.IsEnum){
                     EnumField enumField = new EnumField((System.Enum) field.GetValue(nodeView.node)){
@@ -100,8 +104,6 @@ public class InspectorView : VisualElement
         }
         // Update transition list
         SetListView();
-        listView.itemIndexChanged -= OnItemIndexChanged;
-        listView.itemIndexChanged += OnItemIndexChanged;
     }
     private void SetField<T>(BaseField<T> field, FieldInfo fieldInfo, SerializedObject obj){
         if(!Application.isPlaying){
@@ -131,7 +133,8 @@ public class InspectorView : VisualElement
             SetListView();
         }
         if(focused != null && focused.deleted){
-            listView.Clear();
+            listView.itemsSource = null;
+            listView.Rebuild();
             scrollView.Clear();
             focused = null;
         }

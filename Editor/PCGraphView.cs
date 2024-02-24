@@ -285,14 +285,10 @@ public class PCGraphView : GraphView
     }
 
     public string OnNodeNameChanged(string oldVal, string newVal){
-        if(nodeNames.Contains(newVal)){
-            return GetUniqueName(newVal);
-        }
-        else{
-            nodeNames.Remove(oldVal);
-            nodeNames.Add(newVal);
-            return newVal;
-        }
+        nodeNames.Remove(oldVal);
+        string newName = GetUniqueName(newVal);
+        nodeNames.Add(newName);
+        return newName;
     }
 
 #endregion Utility
