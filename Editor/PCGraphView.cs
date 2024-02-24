@@ -22,7 +22,7 @@ public class PCGraphView : GraphView
 #region Initialize
     public PCGraphView(){
         CreateGridBackground();
-        AddStyleSheet("Assets/PlayerController/Editor/PCWindow.uss");
+        //AddStyleSheet("Assets/PlayerController/Editor/PCWindow.uss");
         AddManipulators();
         nodeViews = new Dictionary<string, PCNodeView>();
         nodeNames = new HashSet<string>();
@@ -37,8 +37,7 @@ public class PCGraphView : GraphView
         gridBackground.StretchToParentSize();
         Insert(0, gridBackground);
     }
-    private void AddStyleSheet(string path){
-        StyleSheet styleSheet = (StyleSheet) EditorGUIUtility.Load(path);
+    public void AddStyleSheet(StyleSheet styleSheet){
         styleSheets.Add(styleSheet);
     }
     private void AddManipulators(){

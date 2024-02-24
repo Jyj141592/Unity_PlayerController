@@ -14,6 +14,8 @@ public class PCWindow : EditorWindow
     public static Dictionary<string, PCWindow> openedWnd = new Dictionary<string, PCWindow>();
     [SerializeField]
     private VisualTreeAsset m_VisualTreeAsset = default;
+    [SerializeField]
+    private StyleSheet styleSheet = default;
     private PCGraphView graphView;
     private InspectorView nodeInspector;
     private TransitionInspector edgeInspector;
@@ -63,6 +65,7 @@ public class PCWindow : EditorWindow
         VisualElement root = rootVisualElement;
         m_VisualTreeAsset.CloneTree(root);
         graphView = root.Q<PCGraphView>();
+        graphView.AddStyleSheet(styleSheet);
         graphView.onNodeSelected = OnNodeSelected;
         graphView.onEdgeSelected = OnEdgeSelected;
 
