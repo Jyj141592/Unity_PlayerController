@@ -1,6 +1,6 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/PlayerController/Editor/PCWindow.uss?fileID=7433441132597879392&amp;guid=576047209bfaa2b43a640281e00bf501&amp;type=3#PCWindow" />
-    <PlayerController.Editor.SplitView fixed-pane-index="1" fixed-pane-initial-dimension="150" focusable="false" style="flex-wrap: nowrap; flex-direction: column; display: flex; visibility: visible; opacity: 1;">
+    <PlayerController.Editor.SplitView fixed-pane-index="1" fixed-pane-initial-dimension="200" focusable="false" style="flex-wrap: nowrap; flex-direction: column; display: flex; visibility: visible; opacity: 1;">
         <ui:VisualElement name="left" style="flex-grow: 1;">
             <PlayerController.Editor.SplitView fixed-pane-initial-dimension="100" fixed-pane-index="0" tabindex="0">
                 <ui:VisualElement style="flex-grow: 1; background-color: rgb(56, 56, 56);">
