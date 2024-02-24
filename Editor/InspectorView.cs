@@ -76,6 +76,7 @@ public class InspectorView : VisualElement
                             if(!newName.Equals(callback.newValue)){
                                 textField.value = newName;
                             }
+                            listView.Rebuild();
                         });
                         scrollView.Add(textField);
                         foundName = true;
