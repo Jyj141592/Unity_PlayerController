@@ -5,7 +5,7 @@ namespace PlayerController{
 [CreateAssetMenu(fileName = "New PlayerController", menuName = "PlayerController")]
 public class PlayerControllerAsset : PCNode
 {
-    [HideInInspector]
+    //[HideInInspector]
     public List<PCNode> nodes;
     public PlayerControllerAsset(){
         actionName = "Entry";

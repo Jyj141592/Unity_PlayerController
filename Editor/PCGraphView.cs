@@ -25,12 +25,10 @@ public class PCGraphView : GraphView
         AddManipulators();
         nodeViews = new Dictionary<string, PCNodeView>();
         nodeNames = new HashSet<string>();
-        // set callbacks
-        SetOnGraphViewChanged();
-        SetElementsDeletion();
         Undo.undoRedoPerformed += () => {
             LoadGraph(entryNode);
-            AssetDatabase.SaveAssets();
+            if(!Application.isPlaying)
+                AssetDatabase.SaveAssets();
         };
     }
     private void CreateGridBackground(){
@@ -68,9 +66,13 @@ public class PCGraphView : GraphView
         foreach(var n in entryNode.nodes){
             LoadEdgeViews(n);
         }
+        graphViewChanged += OnGraphChanged;
+        deleteSelection += ElementsDeletion;
     }
 
     public void ClearGraph(){
+        graphViewChanged -= OnGraphChanged;
+        deleteSelection -= ElementsDeletion;
         DeleteElements(graphElements.ToList());
         nodeViews.Clear();
         nodeNames.Clear();
@@ -121,6 +123,9 @@ public class PCGraphView : GraphView
             AssetDatabase.SaveAssets();
 
         }
+
+        
+
         PCNodeView nodeView = LoadNodeView(node);
 
         return nodeView;
@@ -130,10 +135,15 @@ public class PCGraphView : GraphView
         // undo
         Undo.RecordObject(output.node, "Create Transition");
         Transition transition = new Transition(input.node);
+        //transition.Init(input.node);
         output.node.transition.Add(transition);
+        
+        if(!Application.isPlaying){
+            //AssetDatabase.AddObjectToAsset(transition, output.node);
+            //Undo.RegisterCreatedObjectUndo(transition, "Create Transition");
 
-        AssetDatabase.SaveAssets();
-
+            AssetDatabase.SaveAssets();
+        }
         return transition;
     }
 
@@ -171,11 +181,15 @@ public class PCGraphView : GraphView
     // Modify Assets
     private void DeleteEdge(PCEdgeView edge){
         PCNodeView nodeView = edge.output.node as PCNodeView;
+        if(nodeView.node == null) return;
         // undo
         Undo.RecordObject(nodeView.node, "Delete Transition");
         nodeView.node.transition.Remove(edge.transition);
         nodeView.updated = true;
-        AssetDatabase.SaveAssets();
+        if(!Application.isPlaying){
+           // Undo.DestroyObjectImmediate(edge.transition);
+            AssetDatabase.SaveAssets();
+        }
     }
     private void DisconnectAll(PCNodeView nodeView, List<GraphElement> deleteElements){
         if(nodeView.inputPort != null && nodeView.inputPort.connected){
@@ -195,42 +209,38 @@ public class PCGraphView : GraphView
 
 #region Callbacks
 // create edge & move elements
-    private void SetOnGraphViewChanged(){
-        graphViewChanged = (changes) => {
-            if(changes.edgesToCreate != null){
-                for(int i = 0; i<changes.edgesToCreate.Count;i++){
-                    PCNodeView input = changes.edgesToCreate[i].input.node as PCNodeView;
-                    PCNodeView output = changes.edgesToCreate[i].output.node as PCNodeView;
-                    Transition transition = AddTransition(input, output);
-                    output.updated = true;
-                    changes.edgesToCreate[i] = new PCEdgeView(changes.edgesToCreate[i], transition, onEdgeSelected);
-                }
+    private GraphViewChange OnGraphChanged(GraphViewChange changes){       
+        if(changes.edgesToCreate != null){
+            for(int i = 0; i<changes.edgesToCreate.Count;i++){
+                PCNodeView input = changes.edgesToCreate[i].input.node as PCNodeView;
+                PCNodeView output = changes.edgesToCreate[i].output.node as PCNodeView;
+                Transition transition = AddTransition(input, output);
+                output.updated = true;
+                changes.edgesToCreate[i] = new PCEdgeView(changes.edgesToCreate[i], transition, onEdgeSelected);
             }
-            if(changes.elementsToRemove != null){
-                foreach(var element in changes.elementsToRemove){
-                    if(element is PCEdgeView edge){
-                        DeleteEdge(edge);
-                    }
-                }
+        }
+        if(changes.elementsToRemove != null){
+            foreach(var element in changes.elementsToRemove){
+                if(element is PCEdgeView edge){
+                    DeleteEdge(edge);
+                }               
             }
-            return changes;
-        };
+        }
+        return changes;     
     }
 
-    private void SetElementsDeletion(){
-        deleteSelection = (operationName, askUser) => {
-            List<GraphElement> deleteElements = new List<GraphElement>();
-            foreach(GraphElement element in selection){
-                if(element is PCNodeView nodeView){
-                    if(nodeView.node is PlayerControllerAsset) continue;
-                    else{
-                        DeleteNode(nodeView, deleteElements);
-                    }
+    private void ElementsDeletion(string operationName, AskUser askUser){
+        List<GraphElement> deleteElements = new List<GraphElement>();
+        foreach(GraphElement element in selection){
+            if(element is PCNodeView nodeView){
+                if(nodeView.node is PlayerControllerAsset) continue;
+                else{
+                    DeleteNode(nodeView, deleteElements);
                 }
-                deleteElements.Add(element);
             }
-            DeleteElements(deleteElements);
-        };
+            deleteElements.Add(element);
+        }
+        DeleteElements(deleteElements);
     }
 #endregion Callbacks
 

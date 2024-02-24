@@ -5,11 +5,14 @@ using UnityEngine;
 
 namespace PlayerController{
 [Serializable]
-public class Transition
+public class Transition// : ScriptableObject
 {
     public PCNode dest;
     public bool mute = false;
-    public Transition(PCNode dest){
+    public Transition(PCNode node){
+        dest = node;
+    }
+    public void Init(PCNode dest){
         this.dest = dest;
     }
 

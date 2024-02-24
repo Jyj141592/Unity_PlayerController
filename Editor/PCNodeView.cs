@@ -77,8 +77,8 @@ public class PCNodeView : Node
         // Undo
         Undo.RecordObject(node, "Set Position");
         node.position = newPos.position;
-
-        AssetDatabase.SaveAssets();
+        if(!Application.isPlaying)
+            AssetDatabase.SaveAssets();
     }
 
     //

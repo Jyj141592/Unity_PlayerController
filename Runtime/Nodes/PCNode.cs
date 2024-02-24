@@ -6,11 +6,12 @@ namespace PlayerController{
 public class PCNode : ScriptableObject
 {
     public string actionName;
-    [HideInInspector]
+    //[HideInInspector]
     public Vector2 position;
     [HideInInspector]
     public string guid;
-    [HideInInspector]
+    //[HideInInspector]
+    [SerializeField]
     public List<Transition> transition;
 }
 }
