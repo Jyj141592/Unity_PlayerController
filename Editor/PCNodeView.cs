@@ -6,6 +6,7 @@ using UnityEngine.UIElements;
 using System;
 using UnityEditor;
 using System.Linq;
+using UnityEditor.Rendering;
 
 namespace PlayerController.Editor{
 public class PCNodeView : Node
@@ -84,6 +85,8 @@ public class PCNodeView : Node
 
     public void MoveTransitionIndex(int from, int to){
         Undo.RecordObject(node, "Change Transition Order");
+        SerializedObject obj = new SerializedObject(node);
+        SerializedProperty property = obj.FindProperty("transition");
         var list = outputPort.connections.ToList();
         Edge edge = list[from];
         Transition transition = node.transition[from];
@@ -94,10 +97,9 @@ public class PCNodeView : Node
             }
             for(int i = from; i < to; i++){
                 outputPort.Connect(list[i + 1]);
-                node.transition[i] = node.transition[i + 1];
+                property.MoveArrayElement(i, i + 1);
             }
             outputPort.Connect(edge);
-            node.transition[to] = transition;
             for(int i = to + 1; i < list.Count(); i++){
                 outputPort.Connect(list[i]);
             }
@@ -111,13 +113,13 @@ public class PCNodeView : Node
                 outputPort.Connect(list[i - 1]);
             }
             for(int i = from; i > to; i--){
-                node.transition[i] = node.transition[i - 1];
+                property.MoveArrayElement(i, i - 1);
             }
-            node.transition[to] = transition;
             for(int i = from + 1; i < list.Count(); i++){
                 outputPort.Connect(list[i]);
             }
         }
+        obj.ApplyModifiedProperties();
         AssetDatabase.SaveAssets();
     }
     

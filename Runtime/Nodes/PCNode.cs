@@ -10,7 +10,7 @@ public class PCNode : ScriptableObject
     public Vector2 position;
     [HideInInspector]
     public string guid;
-    [HideInInspector]
+    //[HideInInspector]
     public List<Transition> transition;
 }
 }

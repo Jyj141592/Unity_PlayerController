@@ -6,6 +6,7 @@ using UnityEditor.Experimental.GraphView;
 using UnityEngine.UIElements;
 using System.Reflection;
 using System;
+using System.Linq;
 
 namespace PlayerController.Editor{
 public class PCGraphView : GraphView
@@ -134,9 +135,19 @@ public class PCGraphView : GraphView
     private Transition AddTransition(PCNodeView input, PCNodeView output){
         // undo
         Undo.RecordObject(output.node, "Create Transition");
-        Transition transition = new Transition(input.node);
-        //transition.Init(input.node);
-        output.node.transition.Add(transition);
+        
+        SerializedObject obj = new SerializedObject(output.node);
+        
+        //output.node.transition.Add(transition);
+
+        SerializedProperty property = obj.FindProperty("transition");
+        int pos = output.node.transition.Count;
+        property.InsertArrayElementAtIndex(pos);
+        property.GetArrayElementAtIndex(pos).FindPropertyRelative("dest").objectReferenceValue = input.node;
+
+        obj.ApplyModifiedProperties();
+        //SerializedProperty property = obj.FindProperty("transition");
+        //property.GetEndProperty().
         
         if(!Application.isPlaying){
             //AssetDatabase.AddObjectToAsset(transition, output.node);
@@ -144,7 +155,7 @@ public class PCGraphView : GraphView
 
             AssetDatabase.SaveAssets();
         }
-        return transition;
+        return output.node.transition[pos];
     }
 
 
@@ -183,8 +194,16 @@ public class PCGraphView : GraphView
         PCNodeView nodeView = edge.output.node as PCNodeView;
         if(nodeView.node == null) return;
         // undo
+        int pos = edge.output.connections.ToList().IndexOf(edge);
+        if(pos < 0) return;
         Undo.RecordObject(nodeView.node, "Delete Transition");
-        nodeView.node.transition.Remove(edge.transition);
+        SerializedObject obj = new SerializedObject(nodeView.node);
+        SerializedProperty property = obj.FindProperty("transition");
+        //int pos = nodeView.node.transition.IndexOf(edge.transition);
+        Debug.Log(pos);
+        property.DeleteArrayElementAtIndex(pos);
+        obj.ApplyModifiedProperties();
+        edge.output.Disconnect(edge);
         nodeView.updated = true;
         if(!Application.isPlaying){
            // Undo.DestroyObjectImmediate(edge.transition);

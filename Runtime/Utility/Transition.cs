@@ -12,6 +12,9 @@ public class Transition// : ScriptableObject
     public Transition(PCNode node){
         dest = node;
     }
+    public Transition(){
+        dest = null;
+    }
     public void Init(PCNode dest){
         this.dest = dest;
     }
