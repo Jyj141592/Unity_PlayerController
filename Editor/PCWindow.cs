@@ -17,6 +17,7 @@ public class PCWindow : EditorWindow
     [SerializeField]
     private StyleSheet styleSheet = default;
     private PCGraphView graphView;
+    private ParameterView parameterView;
     private InspectorView nodeInspector;
     private TransitionInspector edgeInspector;
     private VisualElement overlay;
@@ -69,6 +70,8 @@ public class PCWindow : EditorWindow
         graphView.onNodeSelected = OnNodeSelected;
         graphView.onEdgeSelected = OnEdgeSelected;
 
+        parameterView = root.Q<ParameterView>();
+
         scrollView = root.Q<ScrollView>();
         listView = root.Q<ListView>();
         edgeInspector = root.Q<TransitionInspector>();
@@ -80,7 +83,10 @@ public class PCWindow : EditorWindow
 
         //string path = EditorPrefs.GetString(guid);
         PlayerControllerAsset entry = AssetDatabase.LoadAssetAtPath<PlayerControllerAsset>(path);
-        if(entry != null) LoadGraphView(entry);
+        if(entry != null) {
+            LoadGraphView(entry);
+            parameterView.Init(entry.parameterList);
+        }
         else{
             overlay.style.visibility = Visibility.Visible;
         }
