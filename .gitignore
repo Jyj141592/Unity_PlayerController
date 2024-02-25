@@ -72,7 +72,4 @@ crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 
 # Meta Files
-*.meta
-!PCWindow.cs.meta
-!PCWindow.uxml.meta
-!PCWindow.uss.meta
+README.md.meta
