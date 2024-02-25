@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Codice.CM.Client.Differences;
 using UnityEditor;
+using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -10,7 +11,8 @@ namespace PlayerController.Editor{
 public class ParameterView : VisualElement
 {
     public new class UxmlFactory : UxmlFactory<ParameterView, VisualElement.UxmlTraits>{}
-    private DropdownField dropdownField;
+    private ToolbarSearchField searchField;
+    private ToolbarMenu menu;
     private ListView listView;
     private int clickedIndex = -1;
     private double clickedTime = 0;
@@ -21,7 +23,21 @@ public class ParameterView : VisualElement
     private ParameterList parameterList;
 #region Initialize
     public void Init(ParameterList parameterList){
-        dropdownField = this.Q<DropdownField>();
+        // Initialize toolbar searchfield
+        searchField = this.Q<ToolbarSearchField>();
+
+        // Initialize toolbar menu
+        menu = this.Q<ToolbarMenu>();
+        menu.menu.AppendAction("int", (action) => {
+
+        });
+        menu.menu.AppendAction("float", (action) => {
+
+        });
+        menu.menu.AppendAction("bool", (action) => {
+
+        });
+        
         // Initialize listview
         listView = this.Q<ListView>("ParameterList");
         listView.selectionType = SelectionType.Single;

@@ -104,7 +104,7 @@ public class PCWindow : EditorWindow
 
 #region Callbacks
     public void OnSelectionChange() {
-        if(EditorUtility.InstanceIDToObject(instanceID) == null) {
+        if(AssetDatabase.LoadAssetAtPath<PlayerControllerAsset>(path) == null) {
             graphView?.ClearGraph();
             overlay.style.visibility = Visibility.Visible;
         }
