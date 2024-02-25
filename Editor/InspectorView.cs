@@ -79,9 +79,10 @@ public class InspectorView : VisualElement
                         textField.value = (string) field.GetValue(nodeView.node);
                         textField.RegisterValueChangedCallback(callback => {
                             string newName = nodeView.OnNodeNameChanged(callback.previousValue, callback.newValue);
-                            if(!newName.Equals(callback.newValue)){
-                                textField.value = newName;
-                            }
+                            // if(!newName.Equals(callback.newValue)){
+                            //     textField.value = newName;
+                            // }
+                            textField.SetValueWithoutNotify(newName);
                             listView.Rebuild();
                         });
                         scrollView.Add(textField);

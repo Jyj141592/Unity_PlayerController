@@ -1,0 +1,10 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:VisualElement style="flex-grow: 1; flex-direction: row;">
+        <ui:VisualElement style="flex-grow: 1;">
+            <ui:VisualElement name="VisualElement" style="flex-grow: 1; position: relative; left: 0; top: 0; right: 0; bottom: 0;">
+                <ui:VisualElement name="VisualElement" style="flex-grow: 1; visibility: hidden; left: 0; top: 0; right: 0; bottom: 0; background-color: rgb(140, 140, 140);" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement style="flex-grow: 1;" />
+    </ui:VisualElement>
+</ui:UXML>

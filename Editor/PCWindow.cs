@@ -73,7 +73,7 @@ public class PCWindow : EditorWindow
         parameterView = root.Q<ParameterView>();
 
         scrollView = root.Q<ScrollView>();
-        listView = root.Q<ListView>();
+        listView = root.Q<ListView>("TransitionList");
         edgeInspector = root.Q<TransitionInspector>();
         nodeInspector = root.Q<InspectorView>();
         nodeInspector.Init(listView, scrollView, graphView);

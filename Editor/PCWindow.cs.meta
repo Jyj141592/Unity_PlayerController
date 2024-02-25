@@ -6,6 +6,9 @@ MonoImporter:
   defaultReferences:
   - m_ViewDataDictionary: {instanceID: 0}
   - m_VisualTreeAsset: {fileID: 9197481963319205126, guid: 908111469d9451041a55b000e9298f34, type: 3}
+  - intElement: {fileID: 9197481963319205126, guid: e4c6c6d1f1bbda349a07d1a807ed2ffa, type: 3}
+  - floatElement: {fileID: 9197481963319205126, guid: 03af638f6e520ed4783b5938ca55ddd3, type: 3}
+  - boolElement: {fileID: 9197481963319205126, guid: 44a88f29604e42041b9f07be204ed7ea, type: 3}
   - styleSheet: {fileID: 7433441132597879392, guid: 86b3558449021d6449a0057bffb59b6e, type: 3}
   executionOrder: 0
   icon: {instanceID: 0}

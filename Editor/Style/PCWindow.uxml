@@ -1,11 +1,15 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <Style src="project://database/Assets/PlayerController/Editor/PCWindow.uss?fileID=7433441132597879392&amp;guid=576047209bfaa2b43a640281e00bf501&amp;type=3#PCWindow" />
+    <Style src="project://database/Assets/PlayerController/Editor/Style/PCWindow.uss?fileID=7433441132597879392&amp;guid=86b3558449021d6449a0057bffb59b6e&amp;type=3#PCWindow" />
     <PlayerController.Editor.SplitView fixed-pane-index="1" fixed-pane-initial-dimension="200" focusable="false" style="flex-wrap: nowrap; flex-direction: column; display: flex; visibility: visible; opacity: 1;">
         <ui:VisualElement name="left" style="flex-grow: 1;">
             <PlayerController.Editor.SplitView fixed-pane-initial-dimension="100" fixed-pane-index="0" tabindex="0">
                 <ui:VisualElement style="flex-grow: 1; background-color: rgb(56, 56, 56);">
                     <ui:Button text="Ping Asset" parse-escape-sequences="true" display-tooltip-when-elided="true" name="PingAsset" style="height: 25px; margin-top: 2px; margin-right: 5px; margin-bottom: 2px; margin-left: 5px; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; font-size: 15px;" />
-                    <PlayerController.Editor.ParameterView />
+                    <ui:Label tabindex="-1" text="Parameters" parse-escape-sequences="true" display-tooltip-when-elided="true" style="font-size: 12px; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; -unity-text-align: upper-center; color: rgb(255, 255, 255); background-color: rgb(34, 34, 34);" />
+                    <PlayerController.Editor.ParameterView style="flex-grow: 1;">
+                        <ui:DropdownField index="-1" choices="System.Collections.Generic.List`1[System.String]" name="DropdownField" style="-unity-text-align: middle-left; height: 20px; max-height: 20px; min-height: 20px; font-size: 20px; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; color: rgb(255, 255, 255); -unity-font-style: bold; padding-bottom: 4px; padding-left: 3px; flex-direction: row; flex-wrap: nowrap;" />
+                        <ui:ListView focusable="true" name="ParameterList" style="flex-grow: 1;" />
+                    </PlayerController.Editor.ParameterView>
                 </ui:VisualElement>
                 <ui:VisualElement style="flex-grow: 1;">
                     <ui:Label tabindex="-1" text="GraphView" parse-escape-sequences="true" display-tooltip-when-elided="true" />
@@ -22,7 +26,7 @@
                             <ui:ScrollView style="flex-grow: 1;" />
                             <ui:VisualElement style="flex-grow: 1;">
                                 <ui:Label tabindex="-1" text="Transition" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Label" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; -unity-text-align: upper-center; font-size: 10px; background-color: rgb(77, 77, 77);" />
-                                <ui:ListView focusable="true" name="ListView" reorderable="true" horizontal-scrolling="false" show-border="true" reorder-mode="Animated" style="background-color: rgb(77, 77, 77); padding-right: 0; margin-top: 0; flex-shrink: 1; align-items: stretch; flex-grow: 1;" />
+                                <ui:ListView focusable="true" name="TransitionList" reorderable="true" horizontal-scrolling="false" show-border="true" reorder-mode="Animated" style="background-color: rgb(77, 77, 77); padding-right: 0; margin-top: 0; flex-shrink: 1; align-items: stretch; flex-grow: 1;" />
                             </ui:VisualElement>
                         </PlayerController.Editor.SplitView>
                     </PlayerController.Editor.InspectorView>
