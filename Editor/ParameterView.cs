@@ -45,6 +45,7 @@ public class ParameterView : VisualElement
         listView.reorderMode = ListViewReorderMode.Animated;
         listView.itemIndexChanged -= OnChangeListOrder;
         listView.itemIndexChanged += OnChangeListOrder;
+        listView.RegisterCallback<KeyDownEvent>(OnKeyDown, TrickleDown.TrickleDown);
         listView.makeItem = () => {
             VisualElement container = new VisualElement();
             container.style.flexDirection = FlexDirection.Row;
@@ -215,6 +216,7 @@ public class ParameterView : VisualElement
         obj.ApplyModifiedProperties();
     }
 
+
 #endregion Modify List
 
 #region Utility
@@ -235,6 +237,17 @@ public class ParameterView : VisualElement
         return false;
     }
 
+    private void OnKeyDown(KeyDownEvent ev){
+        if(ev.keyCode == KeyCode.Delete){
+            int selected = listView.selectedIndex;
+            SerializedObject obj = new SerializedObject(asset);
+            SerializedProperty property = obj.FindProperty("parameterList").FindPropertyRelative("parameters");
+            property.DeleteArrayElementAtIndex(selected);
+            obj.ApplyModifiedProperties();
+            LoadParameterView();
+        }
+    }
+
     private string GetUniqueName(string name){
         
         return name;
@@ -242,6 +255,7 @@ public class ParameterView : VisualElement
 
     public void OnDestroy(){
         Undo.undoRedoPerformed -= UndoRedoPerformed;
+        listView.UnregisterCallback<KeyDownEvent>(OnKeyDown);
     }
 #endregion Utility
 }
