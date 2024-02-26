@@ -79,13 +79,14 @@ public class PCWindow : EditorWindow
         nodeInspector.Init(listView, scrollView, graphView);
         overlay = root.Q<VisualElement>("Overlay");
         pingAsset = root.Q<Button>();
-        pingAsset.clicked += () => EditorGUIUtility.PingObject(instanceID);
+       
 
         //string path = EditorPrefs.GetString(guid);
         PlayerControllerAsset entry = AssetDatabase.LoadAssetAtPath<PlayerControllerAsset>(path);
         if(entry != null) {
+             pingAsset.clicked += () => EditorGUIUtility.PingObject(entry);
             LoadGraphView(entry);
-            parameterView.Init(entry.parameterList);
+            parameterView.Init(entry);
         }
         else{
             overlay.style.visibility = Visibility.Visible;

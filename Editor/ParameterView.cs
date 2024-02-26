@@ -2,7 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Codice.CM.Client.Differences;
+using Unity.Mathematics;
 using UnityEditor;
+using UnityEditor.Rendering;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -17,26 +19,15 @@ public class ParameterView : VisualElement
     private int clickedIndex = -1;
     private double clickedTime = 0;
 
-    private List<string> test = new List<string>{"one", "two", "three", "four", "five"};
+    //private List<string> test = new List<string>{"one", "two", "three", "four", "five"};
     
     public ParameterView(){}
+    private PlayerControllerAsset asset;
     private ParameterList parameterList;
 #region Initialize
-    public void Init(ParameterList parameterList){
-        // Initialize toolbar searchfield
-        searchField = this.Q<ToolbarSearchField>();
-
-        // Initialize toolbar menu
-        menu = this.Q<ToolbarMenu>();
-        menu.menu.AppendAction("int", (action) => {
-
-        });
-        menu.menu.AppendAction("float", (action) => {
-
-        });
-        menu.menu.AppendAction("bool", (action) => {
-
-        });
+    public void Init(PlayerControllerAsset asset){
+        this.asset = asset;
+        parameterList = asset.parameterList;
         
         // Initialize listview
         listView = this.Q<ListView>("ParameterList");
@@ -48,8 +39,8 @@ public class ParameterView : VisualElement
             container.style.flexDirection = FlexDirection.Row;
             Label label = new Label();
             label.style.flexGrow = label.style.flexShrink = 1;
-            label.RegisterCallback<MouseDownEvent>((ev) => {
-                if(IsDoubleClicked()){
+            label.RegisterCallback<MouseUpEvent>((ev) => {
+                if(IsDoubleClicked(ev)){
                     ChangeParamName(label);
                 }
             });
@@ -58,15 +49,48 @@ public class ParameterView : VisualElement
         };
         listView.bindItem = (e, i) => {
             Label label = e.Q<Label>();
-            label.text = test[i];
-            Toggle toggle = e.Q<Toggle>();
-            if(toggle != null) return;
-            toggle = new Toggle();
-            toggle.style.minWidth = toggle.style.maxWidth = 50;
-            e.Add(new Toggle());
-        };
-        
-        this.parameterList = parameterList;
+            //label.text = parameterList.parameters[i].GetName();
+            SerializedObject obj = new SerializedObject(asset);
+            SerializedProperty property = obj.FindProperty("parameterList").FindPropertyRelative("parameters").GetArrayElementAtIndex(i).FindPropertyRelative("name");
+            label.BindProperty(property);
+            if(parameterList.parameters[i].GetParameterType() == ParameterType.Bool){
+                Toggle toggle = e.Q<Toggle>();
+                if(toggle != null) return;
+                toggle = new Toggle();
+                e.Add(toggle);
+            }
+            else if(parameterList.parameters[i].GetParameterType() == ParameterType.Int){
+                IntegerField intField = e.Q<IntegerField>();
+                if(intField != null) return;
+                intField = new IntegerField();
+                intField.style.minWidth = 35;
+                intField.style.maxWidth = 45;
+                e.Add(intField);
+            }
+            else if(parameterList.parameters[i].GetParameterType() == ParameterType.Float){
+                FloatField floatField = e.Q<FloatField>();
+                if(floatField != null) return;
+                floatField = new FloatField();
+                floatField.style.minWidth = 35;
+                floatField.style.maxWidth = 45;
+                e.Add(floatField);
+            }       
+        };     
+                
+        // Initialize toolbar searchfield
+        searchField = this.Q<ToolbarSearchField>();
+
+        // Initialize toolbar menu
+        menu = this.Q<ToolbarMenu>();
+        menu.menu.AppendAction("int", (action) => {
+            AddParameter(ParameterType.Int);
+        });
+        menu.menu.AppendAction("float", (action) => {
+            AddParameter(ParameterType.Float);
+        });
+        menu.menu.AppendAction("bool", (action) => {
+            AddParameter(ParameterType.Bool);
+        });
 
         LoadParameterView();
     }
@@ -74,13 +98,44 @@ public class ParameterView : VisualElement
     private void LoadParameterView(){
         clickedIndex = -1;
         clickedTime = 0;
-        listView.itemsSource = test;
+        listView.itemsSource = parameterList.parameters;
 
         listView.Rebuild();
     }
 #endregion Initialize
 
 #region Modify List
+    private void AddParameter(ParameterType type){
+        string name = "New";
+        switch(type){
+            case ParameterType.Bool:
+            name = "New Bool";
+            break;
+            case ParameterType.Float:
+            name = "New Float";
+            break;
+            case ParameterType.Int:
+            name = "New Int";
+            break;
+        }
+        SerializedObject obj = new SerializedObject(asset);
+        SerializedProperty p1 = obj.FindProperty("parameterList");
+        SerializedProperty p2 = p1.FindPropertyRelative("parameters");
+        int index = parameterList.parameters.Count;
+        string uName = GetUniqueName(name);
+        p2.InsertArrayElementAtIndex(index);
+        p2.GetArrayElementAtIndex(index).FindPropertyRelative("name").stringValue = uName;
+        p2.GetArrayElementAtIndex(index).FindPropertyRelative("paramID").intValue = Animator.StringToHash(uName);
+        p2.GetArrayElementAtIndex(index).FindPropertyRelative("type").SetEnumValue(type);
+        obj.ApplyModifiedProperties();
+
+        AssetDatabase.SaveAssets();
+            
+        LoadParameterView();
+        
+        listView.SetSelection(index);
+    }
+
     private void ChangeParamName(Label label){
         TextField textField = new TextField();
         label.Add(textField);
@@ -89,7 +144,16 @@ public class ParameterView : VisualElement
         textField.style.paddingLeft = textField.style.marginLeft = 0;
         textField.isDelayed = true;
         textField.RegisterCallback<FocusOutEvent>((ev) => {
-            Debug.Log("focused");
+            string newName = textField.value;
+            if(!newName.Equals(label.text)){
+                newName = GetUniqueName(newName);
+                SerializedObject obj = new SerializedObject(asset);
+                SerializedProperty property = obj.FindProperty("parameterList").FindPropertyRelative("parameters").GetArrayElementAtIndex(clickedIndex);
+                property.FindPropertyRelative("name").stringValue = newName;
+                property.FindPropertyRelative("paramID").intValue = Animator.StringToHash(newName);
+                obj.ApplyModifiedProperties();
+            }
+            label.Remove(textField);
         });
         textField.Focus();
     }
@@ -97,7 +161,12 @@ public class ParameterView : VisualElement
 #endregion Modify List
 
 #region Utility
-    private bool IsDoubleClicked(){
+    private bool IsDoubleClicked(MouseUpEvent ev){
+        if(ev.button != 0){
+            clickedTime = 0;
+            clickedIndex = -1;
+            return false;
+        }
         double prevTime = clickedTime;
         int prevIdx = clickedIndex;
         clickedTime = EditorApplication.timeSinceStartup;
@@ -110,6 +179,7 @@ public class ParameterView : VisualElement
     }
 
     private string GetUniqueName(string name){
+        
         return name;
     }
 #endregion Utility
