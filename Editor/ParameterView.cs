@@ -16,6 +16,7 @@ public class ParameterView : VisualElement
     private ToolbarSearchField searchField;
     private ToolbarMenu menu;
     private ListView listView;
+    private HashSet<string> names;
     private int clickedIndex = -1;
     private double clickedTime = 0;
 
@@ -26,6 +27,7 @@ public class ParameterView : VisualElement
 #region Initialize
     public ParameterView(){
         Undo.undoRedoPerformed += UndoRedoPerformed;
+        names = new HashSet<string>();
     }
     private void UndoRedoPerformed(){
         // PCEditorUtility.InvokeFunctionWithDelay(() => {
@@ -65,12 +67,14 @@ public class ParameterView : VisualElement
             SerializedObject obj = new SerializedObject(asset);
             SerializedProperty property = obj.FindProperty("parameterList").FindPropertyRelative("parameters").GetArrayElementAtIndex(i);
             label.BindProperty(property.FindPropertyRelative("name"));
-                Toggle toggle = e.Q<Toggle>();
-                if(toggle != null) e.Remove(toggle);
-                IntegerField intField = e.Q<IntegerField>();
-                if(intField != null) e.Remove(intField);
-                FloatField floatField = e.Q<FloatField>();
-                if(floatField != null) e.Remove(floatField);
+            names.Add(label.text);
+
+            Toggle toggle = e.Q<Toggle>();
+            if(toggle != null) e.Remove(toggle);
+            IntegerField intField = e.Q<IntegerField>();
+            if(intField != null) e.Remove(intField);
+            FloatField floatField = e.Q<FloatField>();
+            if(floatField != null) e.Remove(floatField);
 
             
             if(parameterList.parameters[i].GetParameterType() == ParameterType.Bool){
@@ -139,6 +143,7 @@ public class ParameterView : VisualElement
         clickedIndex = -1;
         clickedTime = 0;
         listView.Clear();
+        names.Clear();
         listView.itemsSource = parameterList.parameters.ToList();
 
         listView.Rebuild();
@@ -164,6 +169,7 @@ public class ParameterView : VisualElement
         SerializedProperty p2 = p1.FindPropertyRelative("parameters");
         int index = parameterList.parameters.Count;
         string uName = GetUniqueName(name);
+        names.Add(uName);
         p2.InsertArrayElementAtIndex(index);
         p2.GetArrayElementAtIndex(index).FindPropertyRelative("name").stringValue = uName;
         p2.GetArrayElementAtIndex(index).FindPropertyRelative("paramID").intValue = Animator.StringToHash(uName);
@@ -176,6 +182,7 @@ public class ParameterView : VisualElement
         LoadParameterView();
         
         listView.SetSelection(index);
+        clickedIndex = index;
         listView.ScrollToItem(index);
         Label label = listView.GetRootElementForId(index).Q<Label>();
         ChangeParamName(label);
@@ -191,7 +198,9 @@ public class ParameterView : VisualElement
         textField.RegisterCallback<FocusOutEvent>((ev) => {
             string newName = textField.value;
             if(!newName.Equals(label.text)){
+                names.Remove(label.text);
                 newName = GetUniqueName(newName);
+                names.Add(newName);
                 SerializedObject obj = new SerializedObject(asset);
                 SerializedProperty property = obj.FindProperty("parameterList").FindPropertyRelative("parameters").GetArrayElementAtIndex(clickedIndex);
                 property.FindPropertyRelative("name").stringValue = newName;
@@ -253,8 +262,17 @@ public class ParameterView : VisualElement
     }
 
     private string GetUniqueName(string name){
-        
-        return name;
+        if(!names.Contains(name)) return name;
+        string newName = name;
+        int i = 1;
+        while(true){
+            newName = name + $"({i})";
+            if(!names.Contains(newName)){
+                break;
+            }
+            i++;
+        } 
+        return newName;
     }
 
     public void OnDestroy(){
