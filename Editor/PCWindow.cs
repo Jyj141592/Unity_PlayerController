@@ -114,6 +114,7 @@ public class PCWindow : EditorWindow
     public void OnDestroy() {
         //EditorPrefs.DeleteKey(guid);
         openedWnd.Remove(path);
+        graphView.OnDestroy();
     }
 
     public void OnEnable() {

@@ -26,11 +26,7 @@ public class PCGraphView : GraphView
         AddManipulators();
         nodeViews = new Dictionary<string, PCNodeView>();
         nodeNames = new HashSet<string>();
-        Undo.undoRedoPerformed += () => {
-            LoadGraph(entryNode);
-            if(!Application.isPlaying)
-                AssetDatabase.SaveAssets();
-        };
+        Undo.undoRedoPerformed += UndoRedoPerformed;
     }
     private void CreateGridBackground(){
         GridBackground gridBackground = new GridBackground();
@@ -51,6 +47,16 @@ public class PCGraphView : GraphView
     public void SetPositionToRoot(float wWidth){
         Vector2 pos = new Vector2(-entryNode.position.x + wWidth / 2, -entryNode.position.y);
         UpdateViewTransform(pos, Vector3.one);
+    }
+
+    public void UndoRedoPerformed(){
+        LoadGraph(entryNode);
+        if(!Application.isPlaying)
+            AssetDatabase.SaveAssets();
+    }
+
+    public void OnDestroy() {
+        Undo.undoRedoPerformed -= UndoRedoPerformed;
     }
 #endregion Initialize
 

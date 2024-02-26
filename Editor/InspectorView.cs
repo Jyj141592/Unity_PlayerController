@@ -29,14 +29,16 @@ public class InspectorView : VisualElement
         listView.RegisterCallback<KeyDownEvent>(OnKeyDown, TrickleDown.TrickleDown);
         listView.itemIndexChanged += OnItemIndexChanged;
         listView.selectionChanged += OnSelectionChanged;
-        Undo.undoRedoPerformed += ()=> {
-            focused = null;
-            selected = null;
-            this.scrollView.Clear();
-            this.listView.itemsSource = null;
-            this.listView.Rebuild();
-        };
+        Undo.undoRedoPerformed += UndoRedoPerformed;
         
+    }
+
+    private void UndoRedoPerformed(){
+        focused = null;
+        selected = null;
+        this.scrollView.Clear();
+        this.listView.itemsSource = null;
+        this.listView.Rebuild();
     }
     
     public void UpdateInspector(PCNodeView nodeView) {
@@ -162,6 +164,10 @@ public class InspectorView : VisualElement
             focused = null;
             selected = null;
         }
+    }
+
+    public void OnDestroy(){
+        Undo.undoRedoPerformed -= UndoRedoPerformed;
     }
 
     private void AddSelection(PCEdgeView edge){
