@@ -65,11 +65,15 @@ public class ParameterView : VisualElement
             SerializedObject obj = new SerializedObject(asset);
             SerializedProperty property = obj.FindProperty("parameterList").FindPropertyRelative("parameters").GetArrayElementAtIndex(i);
             label.BindProperty(property.FindPropertyRelative("name"));
+                Toggle toggle = e.Q<Toggle>();
+                if(toggle != null) e.Remove(toggle);
+                IntegerField intField = e.Q<IntegerField>();
+                if(intField != null) e.Remove(intField);
+                FloatField floatField = e.Q<FloatField>();
+                if(floatField != null) e.Remove(floatField);
 
             
             if(parameterList.parameters[i].GetParameterType() == ParameterType.Bool){
-                Toggle toggle = e.Q<Toggle>();
-                if(toggle != null) e.Remove(toggle);
                 toggle = new Toggle();
                 toggle.SetValueWithoutNotify(parameterList.parameters[i].GetBool());
                 toggle.RegisterValueChangedCallback((callback) => {
@@ -82,8 +86,6 @@ public class ParameterView : VisualElement
                 e.Add(toggle);
             }
             else if(parameterList.parameters[i].GetParameterType() == ParameterType.Int){
-                IntegerField intField = e.Q<IntegerField>();
-                if(intField != null) e.Remove(intField);
                 intField = new IntegerField();
                 intField.isDelayed = true;
                 intField.SetValueWithoutNotify(parameterList.parameters[i].GetInt());
@@ -99,8 +101,6 @@ public class ParameterView : VisualElement
                 e.Add(intField);
             }
             else if(parameterList.parameters[i].GetParameterType() == ParameterType.Float){
-                FloatField floatField = e.Q<FloatField>();
-                if(floatField != null) e.Remove(floatField);
                 floatField = new FloatField();
                 floatField.isDelayed = true;
                 floatField.SetValueWithoutNotify(parameterList.parameters[i].GetFloat());
@@ -176,6 +176,9 @@ public class ParameterView : VisualElement
         LoadParameterView();
         
         listView.SetSelection(index);
+        listView.ScrollToItem(index);
+        Label label = listView.GetRootElementForId(index).Q<Label>();
+        ChangeParamName(label);
     }
 
     private void ChangeParamName(Label label){
@@ -240,6 +243,7 @@ public class ParameterView : VisualElement
     private void OnKeyDown(KeyDownEvent ev){
         if(ev.keyCode == KeyCode.Delete){
             int selected = listView.selectedIndex;
+            if(selected < 0) return;
             SerializedObject obj = new SerializedObject(asset);
             SerializedProperty property = obj.FindProperty("parameterList").FindPropertyRelative("parameters");
             property.DeleteArrayElementAtIndex(selected);
