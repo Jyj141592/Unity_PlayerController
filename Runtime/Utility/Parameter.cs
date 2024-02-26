@@ -17,11 +17,7 @@ public class Parameter : IComparable<Parameter>, IComparable<int>
     [SerializeField]
     private int paramID;
     [SerializeField]
-    private int intValue = 0;
-    [SerializeField]
-    private float floatValue = 0;
-    [SerializeField]
-    private bool boolValue = false;
+    private float value = 0;
     public void SetName(string name){
         this.name = name;
         paramID = Animator.StringToHash(name);
@@ -30,12 +26,12 @@ public class Parameter : IComparable<Parameter>, IComparable<int>
     public void SetParameterType(ParameterType type){ this.type = type; }
     public ParameterType GetParameterType(){ return type; }
     public int GetID(){ return paramID; }
-    public virtual int GetInt(){ return intValue; }
-    public virtual void SetInt(int value){ intValue = value; }
-    public virtual float GetFloat(){ return floatValue; }
-    public virtual void SetFloat(float value){ floatValue = value; }
-    public virtual bool GetBool(){ return boolValue; }
-    public virtual void SetBool(bool value){ boolValue = value; }
+    public virtual int GetInt(){ return (int)value; }
+    public virtual void SetInt(int value){ this.value = value; }
+    public virtual float GetFloat(){ return value; }
+    public virtual void SetFloat(float value){ this.value = value; }
+    public virtual bool GetBool(){ return value > 0; }
+    public virtual void SetBool(bool value){ this.value = value ? 1 : 0; }
 
     public int CompareTo(Parameter other)
     {

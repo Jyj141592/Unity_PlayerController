@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEditor.Experimental.GraphView;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 
 
 namespace PlayerController.Editor{
@@ -115,6 +116,8 @@ public class PCWindow : EditorWindow
         //EditorPrefs.DeleteKey(guid);
         openedWnd.Remove(path);
         graphView.OnDestroy();
+        nodeInspector.OnDestroy();
+        parameterView.OnDestroy();
     }
 
     public void OnEnable() {

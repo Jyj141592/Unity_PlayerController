@@ -21,10 +21,15 @@ public class ParameterView : VisualElement
 
     //private List<string> test = new List<string>{"one", "two", "three", "four", "five"};
     
-    public ParameterView(){}
     private PlayerControllerAsset asset;
     private ParameterList parameterList;
 #region Initialize
+    public ParameterView(){
+        Undo.undoRedoPerformed += UndoRedoPerformed;
+    }
+    private void UndoRedoPerformed(){
+        LoadParameterView();        
+    }
     public void Init(PlayerControllerAsset asset){
         this.asset = asset;
         parameterList = asset.parameterList;
@@ -51,18 +56,35 @@ public class ParameterView : VisualElement
             Label label = e.Q<Label>();
             //label.text = parameterList.parameters[i].GetName();
             SerializedObject obj = new SerializedObject(asset);
-            SerializedProperty property = obj.FindProperty("parameterList").FindPropertyRelative("parameters").GetArrayElementAtIndex(i).FindPropertyRelative("name");
-            label.BindProperty(property);
+            SerializedProperty property = obj.FindProperty("parameterList").FindPropertyRelative("parameters").GetArrayElementAtIndex(i);
+            label.BindProperty(property.FindPropertyRelative("name"));
             if(parameterList.parameters[i].GetParameterType() == ParameterType.Bool){
                 Toggle toggle = e.Q<Toggle>();
                 if(toggle != null) return;
                 toggle = new Toggle();
+                toggle.SetValueWithoutNotify(parameterList.parameters[i].GetBool());
+                toggle.RegisterValueChangedCallback((callback) => {
+                    float val = callback.newValue ? 1 : 0;
+                    SerializedObject obj = new SerializedObject(asset);
+                    SerializedProperty property = obj.FindProperty("parameterList").FindPropertyRelative("parameters").GetArrayElementAtIndex(i);
+                    property.FindPropertyRelative("value").floatValue = val;
+                    obj.ApplyModifiedProperties();
+                });
                 e.Add(toggle);
             }
             else if(parameterList.parameters[i].GetParameterType() == ParameterType.Int){
                 IntegerField intField = e.Q<IntegerField>();
                 if(intField != null) return;
                 intField = new IntegerField();
+                intField.isDelayed = true;
+                intField.SetValueWithoutNotify(parameterList.parameters[i].GetInt());
+                intField.RegisterValueChangedCallback((callback) => {
+                    float val = callback.newValue;
+                    SerializedObject obj = new SerializedObject(asset);
+                    SerializedProperty property = obj.FindProperty("parameterList").FindPropertyRelative("parameters").GetArrayElementAtIndex(i);
+                    property.FindPropertyRelative("value").floatValue = val;
+                    obj.ApplyModifiedProperties();
+                });
                 intField.style.minWidth = 35;
                 intField.style.maxWidth = 45;
                 e.Add(intField);
@@ -71,6 +93,15 @@ public class ParameterView : VisualElement
                 FloatField floatField = e.Q<FloatField>();
                 if(floatField != null) return;
                 floatField = new FloatField();
+                floatField.isDelayed = true;
+                floatField.SetValueWithoutNotify(parameterList.parameters[i].GetFloat());
+                floatField.RegisterValueChangedCallback((callback) => {
+                    SerializedObject obj = new SerializedObject(asset);
+                    SerializedProperty property = obj.FindProperty("parameterList").FindPropertyRelative("parameters").GetArrayElementAtIndex(i);
+
+                    property.FindPropertyRelative("value").floatValue = callback.newValue;
+                    obj.ApplyModifiedProperties();
+                });
                 floatField.style.minWidth = 35;
                 floatField.style.maxWidth = 45;
                 e.Add(floatField);
@@ -126,6 +157,7 @@ public class ParameterView : VisualElement
         p2.InsertArrayElementAtIndex(index);
         p2.GetArrayElementAtIndex(index).FindPropertyRelative("name").stringValue = uName;
         p2.GetArrayElementAtIndex(index).FindPropertyRelative("paramID").intValue = Animator.StringToHash(uName);
+        p2.GetArrayElementAtIndex(index).FindPropertyRelative("value").floatValue = 0;
         p2.GetArrayElementAtIndex(index).FindPropertyRelative("type").SetEnumValue(type);
         obj.ApplyModifiedProperties();
 
@@ -181,6 +213,10 @@ public class ParameterView : VisualElement
     private string GetUniqueName(string name){
         
         return name;
+    }
+
+    public void OnDestroy(){
+        Undo.undoRedoPerformed -= UndoRedoPerformed;
     }
 #endregion Utility
 }
