@@ -73,7 +73,7 @@ public class PCWindow : EditorWindow
 
         parameterView = root.Q<ParameterView>();
 
-        scrollView = root.Q<ScrollView>();
+        scrollView = root.Q<ScrollView>("NodeInfo");
         listView = root.Q<ListView>("TransitionList");
         edgeInspector = root.Q<TransitionInspector>();
         nodeInspector = root.Q<InspectorView>();

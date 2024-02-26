@@ -28,17 +28,23 @@ public class ParameterView : VisualElement
         Undo.undoRedoPerformed += UndoRedoPerformed;
     }
     private void UndoRedoPerformed(){
-        LoadParameterView();        
+        // PCEditorUtility.InvokeFunctionWithDelay(() => {
+        //     if(!Application.isPlaying) AssetDatabase.SaveAssets();
+        //     LoadParameterView(); 
+        // }, 0.01);       
+        if(!Application.isPlaying) AssetDatabase.SaveAssets();
+            LoadParameterView(); 
     }
     public void Init(PlayerControllerAsset asset){
         this.asset = asset;
         parameterList = asset.parameterList;
-        
         // Initialize listview
         listView = this.Q<ListView>("ParameterList");
         listView.selectionType = SelectionType.Single;
         listView.reorderable = true;
         listView.reorderMode = ListViewReorderMode.Animated;
+        listView.itemIndexChanged -= OnChangeListOrder;
+        listView.itemIndexChanged += OnChangeListOrder;
         listView.makeItem = () => {
             VisualElement container = new VisualElement();
             container.style.flexDirection = FlexDirection.Row;
@@ -58,9 +64,11 @@ public class ParameterView : VisualElement
             SerializedObject obj = new SerializedObject(asset);
             SerializedProperty property = obj.FindProperty("parameterList").FindPropertyRelative("parameters").GetArrayElementAtIndex(i);
             label.BindProperty(property.FindPropertyRelative("name"));
+
+            
             if(parameterList.parameters[i].GetParameterType() == ParameterType.Bool){
                 Toggle toggle = e.Q<Toggle>();
-                if(toggle != null) return;
+                if(toggle != null) e.Remove(toggle);
                 toggle = new Toggle();
                 toggle.SetValueWithoutNotify(parameterList.parameters[i].GetBool());
                 toggle.RegisterValueChangedCallback((callback) => {
@@ -74,7 +82,7 @@ public class ParameterView : VisualElement
             }
             else if(parameterList.parameters[i].GetParameterType() == ParameterType.Int){
                 IntegerField intField = e.Q<IntegerField>();
-                if(intField != null) return;
+                if(intField != null) e.Remove(intField);
                 intField = new IntegerField();
                 intField.isDelayed = true;
                 intField.SetValueWithoutNotify(parameterList.parameters[i].GetInt());
@@ -91,7 +99,7 @@ public class ParameterView : VisualElement
             }
             else if(parameterList.parameters[i].GetParameterType() == ParameterType.Float){
                 FloatField floatField = e.Q<FloatField>();
-                if(floatField != null) return;
+                if(floatField != null) e.Remove(floatField);
                 floatField = new FloatField();
                 floatField.isDelayed = true;
                 floatField.SetValueWithoutNotify(parameterList.parameters[i].GetFloat());
@@ -129,7 +137,8 @@ public class ParameterView : VisualElement
     private void LoadParameterView(){
         clickedIndex = -1;
         clickedTime = 0;
-        listView.itemsSource = parameterList.parameters;
+        listView.Clear();
+        listView.itemsSource = parameterList.parameters.ToList();
 
         listView.Rebuild();
     }
@@ -188,6 +197,22 @@ public class ParameterView : VisualElement
             label.Remove(textField);
         });
         textField.Focus();
+    }
+
+    public void OnChangeListOrder(int oldPos, int newPos){
+        SerializedObject obj = new SerializedObject(asset);
+        SerializedProperty property = obj.FindProperty("parameterList").FindPropertyRelative("parameters");
+        if(oldPos > newPos){
+            for(int i = oldPos; i > newPos; i--){
+                property.MoveArrayElement(i, i - 1);
+            }
+        }
+        else{
+            for(int i = oldPos; i < newPos; i++){
+                property.MoveArrayElement(i, i + 1);
+            }
+        }
+        obj.ApplyModifiedProperties();
     }
 
 #endregion Modify List

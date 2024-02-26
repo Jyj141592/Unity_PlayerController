@@ -168,6 +168,7 @@ public class InspectorView : VisualElement
 
     public void OnDestroy(){
         Undo.undoRedoPerformed -= UndoRedoPerformed;
+        listView.UnregisterCallback<KeyDownEvent>(OnKeyDown);
     }
 
     private void AddSelection(PCEdgeView edge){
