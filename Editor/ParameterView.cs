@@ -13,7 +13,7 @@ namespace PlayerController.Editor{
 public class ParameterView : VisualElement
 {
     public new class UxmlFactory : UxmlFactory<ParameterView, VisualElement.UxmlTraits>{}
-    private ToolbarSearchField searchField;
+    private ToolbarPopupSearchField searchField;
     private ToolbarMenu menu;
     private ListView listView;
     private HashSet<string> names;
@@ -122,7 +122,7 @@ public class ParameterView : VisualElement
         };     
                 
         // Initialize toolbar searchfield
-        searchField = this.Q<ToolbarSearchField>();
+        searchField = this.Q<ToolbarPopupSearchField>();
 
         // Initialize toolbar menu
         menu = this.Q<ToolbarMenu>();

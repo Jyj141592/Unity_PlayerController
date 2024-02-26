@@ -8,7 +8,7 @@
                     <ui:Label tabindex="-1" text="Parameters" parse-escape-sequences="true" display-tooltip-when-elided="true" style="font-size: 12px; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; -unity-text-align: upper-center; color: rgb(255, 255, 255); background-color: rgb(34, 34, 34);" />
                     <PlayerController.Editor.ParameterView style="flex-grow: 1;">
                         <uie:Toolbar name="Toolbar">
-                            <uie:ToolbarSearchField focusable="true" style="flex-grow: 1; min-width: 0; width: 50px;" />
+                            <uie:ToolbarPopupSearchField focusable="true" style="min-width: 0; width: 50px; flex-grow: 1;" />
                             <uie:ToolbarMenu tabindex="-1" parse-escape-sequences="true" display-tooltip-when-elided="true" text=" +" style="min-width: 40px; max-width: 40px; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; -unity-text-align: upper-center; font-size: 28px; -unity-font-style: bold;" />
                         </uie:Toolbar>
                         <ui:ListView focusable="true" name="ParameterList" style="flex-grow: 1;" />
