@@ -9,17 +9,17 @@ public class Transition// : ScriptableObject
 {
     public PCNode dest;
     public bool mute = false;
+    public List<Condition> conditions;
     public Transition(PCNode node){
         dest = node;
     }
     public Transition(){
         dest = null;
+        conditions = new List<Condition>();
     }
     public void Init(PCNode dest){
         this.dest = dest;
     }
-
-    public int test;
     public bool canTransition(){
         return false;
     }
