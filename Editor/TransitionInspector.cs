@@ -18,6 +18,7 @@ public class TransitionInspector : VisualElement
     private PCEdgeView edge;
     private PCNodeView nodeView;
     private ParameterList parameterList;
+    private Label transitionName;
     private Foldout foldout;
     private ListView listView;
     private Button button;
@@ -30,6 +31,7 @@ public class TransitionInspector : VisualElement
         foldout = this.Q<Foldout>();
         listView = this.Q<ListView>();
         button = this.Q<Button>();
+        transitionName = this.Q<Label>("TransitionName");
         listView.reorderable = false;
         listView.selectionType = SelectionType.Single;
         listView.RegisterCallback<KeyDownEvent>(OnKeyDown, TrickleDown.TrickleDown);
@@ -56,9 +58,8 @@ public class TransitionInspector : VisualElement
     }
 
     public void UpdateInspector(PCEdgeView edge){
-        Debug.Log(edge.transitionIndex);
-
         ClearInspector();
+        transitionName.text = edge.ToString();
         edge.onDeleted += OnEdgeDeleted;
         edge.onUpdated += OnEdgeUpdated;
         this.edge = edge;
@@ -132,6 +133,7 @@ public class TransitionInspector : VisualElement
     }
 
     public void ClearInspector(){
+        transitionName.text = null;
         if(edge != null){
             edge.onDeleted -= OnEdgeDeleted;
             edge.onUpdated -= OnEdgeUpdated;
