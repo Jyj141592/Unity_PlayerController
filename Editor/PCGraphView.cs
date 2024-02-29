@@ -99,9 +99,11 @@ public class PCGraphView : GraphView
     private void LoadEdgeViews(PCNode node){
         PCNodeView output = nodeViews[node.guid];
         if(node.transition != null){
+            int i = 0;
             foreach(var t in node.transition){
                 PCNodeView input = nodeViews[t.dest.guid];
-                PCEdgeView edgeView = new PCEdgeView(input.inputPort, output.outputPort, t, onEdgeSelected);
+                PCEdgeView edgeView = new PCEdgeView(input.inputPort, output.outputPort, t, onEdgeSelected, i);
+                i++;
                 output.outputPort.Connect(edgeView);
                 input.inputPort.Connect(edgeView);
                 AddElement(edgeView);          
@@ -206,6 +208,7 @@ public class PCGraphView : GraphView
         obj.ApplyModifiedProperties();
         edge.output.Disconnect(edge);
         nodeView.updated = true;
+        edge.deleted = true;
         if(!Application.isPlaying){
            // Undo.DestroyObjectImmediate(edge.transition);
             AssetDatabase.SaveAssets();
@@ -236,7 +239,7 @@ public class PCGraphView : GraphView
                 PCNodeView output = changes.edgesToCreate[i].output.node as PCNodeView;
                 Transition transition = AddTransition(input, output);
                 output.updated = true;
-                changes.edgesToCreate[i] = new PCEdgeView(changes.edgesToCreate[i], transition, onEdgeSelected);
+                changes.edgesToCreate[i] = new PCEdgeView(changes.edgesToCreate[i], transition, onEdgeSelected, output.outputPort.connections.Count());
             }
         }
         if(changes.elementsToRemove != null){

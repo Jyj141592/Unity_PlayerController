@@ -88,35 +88,49 @@ public class PCNodeView : Node
         SerializedObject obj = new SerializedObject(node);
         SerializedProperty property = obj.FindProperty("transition");
         var list = outputPort.connections.ToList();
-        Edge edge = list[from];
+        PCEdgeView edge = list[from] as PCEdgeView;
+        edge.transitionIndex = to;
+        PCEdgeView edgeView;
         Transition transition = node.transition[from];
         outputPort.DisconnectAll();
         if(to > from){
             for(int i = 0; i < from; i++){
-                outputPort.Connect(list[i]);
+                edgeView = list[i] as PCEdgeView;
+                edgeView.transitionIndex = i;
+                outputPort.Connect(edgeView);
             }
             for(int i = from; i < to; i++){
-                outputPort.Connect(list[i + 1]);
+                edgeView = list[i + 1] as PCEdgeView;
+                edgeView.transitionIndex = i;
+                outputPort.Connect(edgeView);
                 property.MoveArrayElement(i, i + 1);
             }
             outputPort.Connect(edge);
             for(int i = to + 1; i < list.Count(); i++){
-                outputPort.Connect(list[i]);
+                edgeView = list[i] as PCEdgeView;
+                edgeView.transitionIndex = i;
+                outputPort.Connect(edgeView);
             }
         }
         else{
             for(int i = 0; i < to; i++){
-                outputPort.Connect(list[i]);
+                edgeView = list[i] as PCEdgeView;
+                edgeView.transitionIndex = i;
+                outputPort.Connect(edgeView);
             }
             outputPort.Connect(edge);
             for(int i = to + 1; i <= from; i++){
-                outputPort.Connect(list[i - 1]);
+                edgeView = list[i - 1] as PCEdgeView;
+                edgeView.transitionIndex = i;
+                outputPort.Connect(edgeView);
             }
             for(int i = from; i > to; i--){
                 property.MoveArrayElement(i, i - 1);
             }
             for(int i = from + 1; i < list.Count(); i++){
-                outputPort.Connect(list[i]);
+                edgeView = list[i] as PCEdgeView;
+                edgeView.transitionIndex = i;
+                outputPort.Connect(edgeView);
             }
         }
         obj.ApplyModifiedProperties();
