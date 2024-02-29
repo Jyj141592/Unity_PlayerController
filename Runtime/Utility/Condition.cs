@@ -10,9 +10,15 @@ public enum TransitionCondition{
 [Serializable]
 public class Condition
 {
+    [SerializeField]
     private string paramName;
+    [SerializeField]
     private int paramID;
+    private int paramIndex;
+    [SerializeField]
     private TransitionCondition condition;
+    [SerializeField]
+    private float value;
     public bool IsTrue(){
         return false;
     }

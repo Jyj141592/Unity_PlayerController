@@ -9,15 +9,18 @@ using System.Reflection;
 using Unity.VisualScripting;
 using UnityEditor.Rendering;
 using Codice.Client.BaseCommands.Update;
+using System.Linq;
 
 namespace PlayerController.Editor{
 public class TransitionInspector : VisualElement
 {
     public new class UxmlFactory : UxmlFactory<TransitionInspector, VisualElement.UxmlTraits>{}
     private PCEdgeView edge;
+    private PCNodeView nodeView;
     private ParameterList parameterList;
     private Foldout foldout;
     private ListView listView;
+    private Button button;
     
     public TransitionInspector(){
         Undo.undoRedoPerformed += OnUndoRedoPerformed;
@@ -26,6 +29,26 @@ public class TransitionInspector : VisualElement
         parameterList = list;
         foldout = this.Q<Foldout>();
         listView = this.Q<ListView>();
+        button = this.Q<Button>();
+        listView.reorderable = false;
+        listView.selectionType = SelectionType.Single;
+        listView.RegisterCallback<KeyDownEvent>(OnKeyDown, TrickleDown.TrickleDown);
+        listView.makeItem = () => {
+            VisualElement root = new VisualElement();
+            root.style.flexDirection = FlexDirection.Row;
+            DropdownField dropdownField = new DropdownField();
+            foreach(var p in parameterList.parameters){
+                dropdownField.choices.Add(p.GetName());
+            }
+            root.Add(dropdownField);
+            return root;
+        };
+        listView.bindItem = (e, i) => {
+
+        };
+
+        button.clicked -= AddCondition;
+        button.clicked += AddCondition;
     }
 
     private void OnUndoRedoPerformed(){
@@ -35,14 +58,14 @@ public class TransitionInspector : VisualElement
     public void UpdateInspector(PCEdgeView edge){
         ClearInspector();
         this.edge = edge;
-        PCNodeView nodeView = edge.output.node as PCNodeView;
+        nodeView = edge.output.node as PCNodeView;
         SerializedObject obj = new SerializedObject(nodeView.node);
         var fields = typeof(Transition).GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
         foreach(var field in fields){
             if(!field.IsPublic && field.GetCustomAttribute<SerializeField>(true) == null) continue;
             if(field.GetCustomAttribute<HideInInspector>(true) != null) continue;
             if(field.Name.Equals("conditions")){
-                
+                LoadListView();
                 return;
             }
             if(field.FieldType == typeof(int)){
@@ -108,6 +131,37 @@ public class TransitionInspector : VisualElement
         foldout.Clear();
         listView.Clear();
     }
+    public void LoadListView(){
+        listView.Clear();
+        listView.itemsSource = edge.transition.conditions.ToList();
+        listView.Rebuild();
+    }
+    private void AddCondition(){
+        if(parameterList.parameters.Count <= 0) return;
+        Parameter param = parameterList.parameters[0];
+        SerializedObject obj = new SerializedObject(nodeView.node);
+        SerializedProperty property = obj.FindProperty("transition").GetArrayElementAtIndex(edge.transitionIndex).FindPropertyRelative("conditions");
+        int index = edge.transition.conditions.Count;
+        property.InsertArrayElementAtIndex(index);
+        property = property.GetArrayElementAtIndex(index);
+        property.FindPropertyRelative("paramName").stringValue = param.GetName();
+        property.FindPropertyRelative("paramID").intValue = param.GetID();
+        property.FindPropertyRelative("value").floatValue = 0;
+        property = property.FindPropertyRelative("condition");
+        switch(param.GetParameterType()){
+            case ParameterType.Bool:
+            property.SetEnumValue(TransitionCondition.Bool_False);
+            break;
+            case ParameterType.Float:
+            property.SetEnumValue(TransitionCondition.Float_Greater);
+            break;
+            case ParameterType.Int:
+            property.SetEnumValue(TransitionCondition.Int_Greater);
+            break;
+        }
+        obj.ApplyModifiedProperties();
+        LoadListView();
+    }
     public void Update(){
         if(edge != null){
             if(edge.updated){
@@ -123,6 +177,10 @@ public class TransitionInspector : VisualElement
     }
     public void OnDestroy(){
         Undo.undoRedoPerformed -= OnUndoRedoPerformed;
+    }
+
+    private void OnKeyDown(KeyDownEvent ev){
+
     }
 }
 }
