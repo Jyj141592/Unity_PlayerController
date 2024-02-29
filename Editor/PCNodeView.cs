@@ -17,8 +17,8 @@ public class PCNodeView : Node
     public Port outputPort = null;
     private Color defaultColor = new Color(80f / 255f, 80f / 255f, 80f / 255f);
     public Action<PCNodeView> onNodeSelected;
-    public bool updated = true;
-    public bool deleted = false;
+    public Action onUpdated;
+    public Action onDeleted;
     private Func<string, string, string> onNodeNameChanged;
 
 #region Initialize
@@ -148,6 +148,13 @@ public class PCNodeView : Node
             AssetDatabase.SaveAssets();
         }
         return newName;
+    }
+    public void OnDeleteEdge(int index){
+        for(int i = index; i < outputPort.connections.Count(); i++){
+            PCEdgeView edge = outputPort.connections.ElementAt(i) as PCEdgeView;
+            edge.transitionIndex = i;
+        }
+        onUpdated?.Invoke();
     }
 #endregion Callbacks
 }

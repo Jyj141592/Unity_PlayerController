@@ -15,13 +15,13 @@ public class PCEdgeView : Edge
         set{
             if(value != _transitionIndex){
                 _transitionIndex = value;
-                updated = true;
+                onUpdated?.Invoke();
             }  
         }
     }
+    public Action onUpdated;
+    public Action onDeleted;
     private int _transitionIndex = -1;
-    public bool updated = true;
-    public bool deleted = false;
     public PCEdgeView(Edge edge, Transition transition, Action<PCEdgeView> action, int index){
         this.transition = transition;
         output = edge.output;

@@ -42,10 +42,10 @@ public class InspectorView : VisualElement
     }
     
     public void UpdateInspector(PCNodeView nodeView) {
-        scrollView.Clear();
-        listView.Clear();
-        selected = null;
+        ClearInspector();
         focused = nodeView;
+        nodeView.onDeleted += OnNodeDeleted;
+        nodeView.onUpdated += OnNodeUpdated;
         bool foundName = false;
         SerializedObject obj = new SerializedObject(nodeView.node);
         if(nodeView.node is not PlayerControllerAsset){
@@ -126,10 +126,23 @@ public class InspectorView : VisualElement
         }
         scrollView.Add(field);
     }
+    private void ClearInspector(){
+        listView.itemsSource = null;
+        listView.Rebuild();
+        listView.ClearSelection();
+        scrollView.Clear();
+        if(focused != null){
+            focused.onDeleted -= OnNodeDeleted;
+            focused.onUpdated -= OnNodeUpdated;
+            focused = null;
+        }
+        selected = null;
+    }
     private void SetListView(){
+        listView.Clear();
         listView.itemsSource = focused.outputPort.connections.ToList();
         listView.Rebuild();
-        focused.updated = false;
+        listView.ClearSelection();
     }
     private void OnItemIndexChanged(int oldVal, int newVal){
         focused.MoveTransitionIndex(oldVal, newVal);
@@ -153,23 +166,18 @@ public class InspectorView : VisualElement
             }
         }
     }
-    public void Update(){
-        if(listView != null && focused != null && focused.updated){          
-            SetListView();
-        }
-        if(focused != null && focused.deleted){
-            listView.itemsSource = null;
-            listView.Rebuild();
-            scrollView.Clear();
-            focused = null;
-            selected = null;
-        }
+    private void OnNodeUpdated(){
+        SetListView();
+    }
+    private void OnNodeDeleted(){
+        ClearInspector();
     }
 
     public void OnDestroy(){
         Undo.undoRedoPerformed -= UndoRedoPerformed;
         listView.UnregisterCallback<KeyDownEvent>(OnKeyDown);
     }
+    
 
     private void AddSelection(PCEdgeView edge){
         graphView.AddToSelection(edge);

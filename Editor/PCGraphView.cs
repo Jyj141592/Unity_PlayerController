@@ -186,7 +186,7 @@ public class PCGraphView : GraphView
         entryNode.nodes.Remove(nodeView.node);
         nodeViews.Remove(nodeView.node.guid);
         nodeNames.Remove(nodeView.node.actionName);
-        nodeView.deleted = true;
+        nodeView.onDeleted?.Invoke();
         if(!Application.isPlaying){
             //AssetDatabase.RemoveObjectFromAsset(nodeView.node);
             Undo.DestroyObjectImmediate(nodeView.node);
@@ -207,8 +207,8 @@ public class PCGraphView : GraphView
         property.DeleteArrayElementAtIndex(pos);
         obj.ApplyModifiedProperties();
         edge.output.Disconnect(edge);
-        nodeView.updated = true;
-        edge.deleted = true;
+        nodeView.OnDeleteEdge(edge.transitionIndex);
+        edge.onDeleted?.Invoke();
         if(!Application.isPlaying){
            // Undo.DestroyObjectImmediate(edge.transition);
             AssetDatabase.SaveAssets();
@@ -238,8 +238,11 @@ public class PCGraphView : GraphView
                 PCNodeView input = changes.edgesToCreate[i].input.node as PCNodeView;
                 PCNodeView output = changes.edgesToCreate[i].output.node as PCNodeView;
                 Transition transition = AddTransition(input, output);
-                output.updated = true;
-                changes.edgesToCreate[i] = new PCEdgeView(changes.edgesToCreate[i], transition, onEdgeSelected, output.outputPort.connections.Count());
+                PCEdgeView edge = new PCEdgeView(changes.edgesToCreate[i], transition, onEdgeSelected, output.outputPort.connections.Count());
+                input.inputPort.Connect(edge);
+                output.outputPort.Connect(edge);
+                changes.edgesToCreate[i] = edge;
+                output.onUpdated?.Invoke();
             }
         }
         if(changes.elementsToRemove != null){

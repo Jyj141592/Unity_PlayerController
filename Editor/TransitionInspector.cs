@@ -56,7 +56,11 @@ public class TransitionInspector : VisualElement
     }
 
     public void UpdateInspector(PCEdgeView edge){
+        Debug.Log(edge.transitionIndex);
+
         ClearInspector();
+        edge.onDeleted += OnEdgeDeleted;
+        edge.onUpdated += OnEdgeUpdated;
         this.edge = edge;
         nodeView = edge.output.node as PCNodeView;
         SerializedObject obj = new SerializedObject(nodeView.node);
@@ -128,6 +132,11 @@ public class TransitionInspector : VisualElement
     }
 
     public void ClearInspector(){
+        if(edge != null){
+            edge.onDeleted -= OnEdgeDeleted;
+            edge.onUpdated -= OnEdgeUpdated;
+            edge = null;
+        }
         foldout.Clear();
         listView.Clear();
     }
@@ -162,25 +171,18 @@ public class TransitionInspector : VisualElement
         obj.ApplyModifiedProperties();
         LoadListView();
     }
-    public void Update(){
-        if(edge != null){
-            if(edge.updated){
-                edge.updated = false;
-                UpdateInspector(edge);
-            }
-            if(edge.deleted){
-                edge = null;
-                ClearInspector();
-            }
-        }
-
-    }
     public void OnDestroy(){
         Undo.undoRedoPerformed -= OnUndoRedoPerformed;
     }
 
     private void OnKeyDown(KeyDownEvent ev){
 
+    }
+    private void OnEdgeUpdated(){
+        UpdateInspector(edge);
+    }
+    private void OnEdgeDeleted(){
+        ClearInspector();
     }
 }
 }

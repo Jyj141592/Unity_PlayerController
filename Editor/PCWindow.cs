@@ -127,19 +127,15 @@ public class PCWindow : EditorWindow
         }        
     }
 
-    public void OnInspectorUpdate() {
-        UpdateInspector();
-    }
+    // public void OnInspectorUpdate() {
+        
+    // }
 
     public void OnNodeSelected(PCNodeView nodeView){
         nodeInspector?.UpdateInspector(nodeView);
     }
     public void OnEdgeSelected(PCEdgeView edge){
         edgeInspector?.UpdateInspector(edge);
-    }
-    public void UpdateInspector(){
-        nodeInspector.Update();
-        edgeInspector.Update();
     }
 #endregion Callbacks
 }
