@@ -7,8 +7,5 @@ namespace PlayerController{
 [DisallowCreateNode]
 public class AnyState : PCNode
 {
-    public AnyState(){
-        actionName = "Any State";
-    }
 }
 }

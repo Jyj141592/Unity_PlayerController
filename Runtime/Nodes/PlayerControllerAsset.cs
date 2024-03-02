@@ -15,7 +15,6 @@ public class PlayerControllerAsset : PCNode
     public AnyState anyState = null;
     public ParameterList parameterList = null;
     public PlayerControllerAsset(){
-        actionName = "Entry";
         parameterList = new ParameterList();
     }
 }

@@ -13,8 +13,8 @@ public static class PCEditorUtility
         var name = path.Split('.');
         return name[^1];
     }
-
     public static string ToUpperFirstLetter(string str){
+        if(str[0] == '_') str = str.Substring(1);
         if(str.Length == 0){
             return "";
         }
