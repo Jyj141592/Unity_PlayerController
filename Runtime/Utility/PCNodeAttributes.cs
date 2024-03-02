@@ -11,4 +11,9 @@ public class CreateNodeMenuAttribute : Attribute{
         this.path = path;
     }
 }
+
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+public class DisallowCreateNodeAttribute : Attribute{
+    
+}
 }

@@ -65,10 +65,15 @@ public class PCGraphView : GraphView
         ClearGraph();
         entryNode = node;
         rootNode = LoadNodeView(node);
+        if(entryNode.anyState == null){
+            CreateAnyStateNode(entryNode);
+        }
+        LoadNodeView(entryNode.anyState);
         foreach(var n in entryNode.nodes){
             LoadNodeView(n);
         }
         LoadEdgeViews(node);
+        LoadEdgeViews(entryNode.anyState);
         foreach(var n in entryNode.nodes){
             LoadEdgeViews(n);
         }
@@ -113,6 +118,18 @@ public class PCGraphView : GraphView
 #endregion Load
 
 #region Create Elements
+    private void CreateAnyStateNode(PlayerControllerAsset asset){
+        AnyState anyState = ScriptableObject.CreateInstance<AnyState>();
+        anyState.position = new Vector2(0, -100);
+        anyState.guid = GUID.Generate().ToString();
+        anyState.transition = new List<Transition>();
+        anyState.actionName = "Any State";
+        asset.anyState = anyState;
+        if(!Application.isPlaying){
+            AssetDatabase.AddObjectToAsset(anyState, asset);
+            AssetDatabase.SaveAssets();
+        }
+    }
     // Modifing Asset
     private PCNodeView CreateNodeView(System.Type type, Vector2 position){
         var node = (PCNode) ScriptableObject.CreateInstance(type);
@@ -260,7 +277,7 @@ public class PCGraphView : GraphView
         List<GraphElement> deleteElements = new List<GraphElement>();
         foreach(GraphElement element in selection){
             if(element is PCNodeView nodeView){
-                if(nodeView.node is PlayerControllerAsset) continue;
+                if(nodeView.node is PlayerControllerAsset || nodeView.node is AnyState) continue;
                 else{
                     DeleteNode(nodeView, deleteElements);
                 }
@@ -284,8 +301,8 @@ public class PCGraphView : GraphView
         });
         var types = TypeCache.GetTypesDerivedFrom<PCNode>();
         foreach(System.Type type in types){
-            if(type.Equals(typeof(PlayerControllerAsset))) continue;
-            else if(type.Equals(typeof(SubGraphNode))) continue;
+            var attr = type.GetCustomAttribute<DisallowCreateNodeAttribute>();
+            if(attr != null) continue;
 
             string path = "New node/";
             var attribute = type.GetCustomAttribute<CreateNodeMenuAttribute>();

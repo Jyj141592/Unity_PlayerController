@@ -36,7 +36,7 @@ public class PCNodeView : Node
         mainContainer.style.maxWidth = 300;
 
         // Create input port
-        if(node is not PlayerControllerAsset){
+        if(node is not PlayerControllerAsset && node is not AnyState){
             inputPort = CreatePort(Orientation.Vertical, Direction.Input, Port.Capacity.Multi);
             inputPort.style.marginLeft = 8;
             mainContainer.Insert(0, inputPort);

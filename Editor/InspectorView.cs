@@ -48,7 +48,7 @@ public class InspectorView : VisualElement
         nodeView.onUpdated += OnNodeUpdated;
         bool foundName = false;
         SerializedObject obj = new SerializedObject(nodeView.node);
-        if(nodeView.node is not PlayerControllerAsset){
+        if(nodeView.node is not PlayerControllerAsset && nodeView.node is not AnyState){
             Stack<Type> stack = new Stack<Type>();
             Type type = nodeView.node.GetType();
             while(type != null){

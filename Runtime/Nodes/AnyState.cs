@@ -5,8 +5,10 @@ using UnityEngine;
 
 namespace PlayerController{
 [DisallowCreateNode]
-public class SubGraphNode : PCNode
+public class AnyState : PCNode
 {
-    
+    public AnyState(){
+        actionName = "Any State";
+    }
 }
 }
