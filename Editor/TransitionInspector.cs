@@ -116,46 +116,47 @@ public class TransitionInspector : VisualElement
                 return;
             }
             if(field.GetCustomAttribute<HideInInspector>(true) != null) continue;
+            string name = PCEditorUtility.ToInspectorName(field.Name);
             if(field.FieldType == typeof(int)){
                 IntegerField intField = new IntegerField(){
-                    label = field.Name
+                    label = name
                 };
                 SetField(intField, field, obj);
             }
             else if(field.FieldType == typeof(float)){
                 FloatField floatField = new FloatField(){
-                    label = field.Name
+                    label = name
                 };
                 SetField(floatField, field, obj);
             }
             else if(field.FieldType == typeof(bool)){
                 Toggle toggle = new Toggle(){
-                    label = field.Name
+                    label = name
                 };
                 SetField(toggle, field, obj);
             }
             else if(field.FieldType == typeof(string)){
                 TextField textField = new TextField(){
-                    label = field.Name
+                    label = name
                 };
                 textField.isDelayed = true;
                 SetField(textField, field, obj);
             }
             else if(field.FieldType.IsEnum){
                 EnumField enumField = new EnumField((System.Enum) field.GetValue(nodeView.node)){
-                    label = field.Name
+                    label = name
                 };               
                 SetField(enumField, field, obj);
             }
             else if(field.FieldType == typeof(Vector2)){
                 Vector2Field vector2Field = new Vector2Field(){
-                    label = field.Name
+                    label = name
                 };
                 SetField(vector2Field, field, obj);
             }
             else if(field.FieldType == typeof(Vector3)){
                 Vector3Field vector3Field = new Vector3Field(){
-                    label = field.Name
+                    label = name
                 };
                 SetField(vector3Field, field, obj);
             }

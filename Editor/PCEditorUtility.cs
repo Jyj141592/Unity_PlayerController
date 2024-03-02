@@ -2,6 +2,7 @@ using System;
 using System.CodeDom;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -11,6 +12,34 @@ public static class PCEditorUtility
     public static string NamespaceToClassName(string path){
         var name = path.Split('.');
         return name[^1];
+    }
+
+    public static string ToUpperFirstLetter(string str){
+        if(str.Length == 0){
+            return "";
+        }
+        else if(str.Length == 1){
+            return char.ToUpper(str[0]).ToString();
+        }
+        else{
+            return char.ToUpper(str[0]) + str.Substring(1);
+        }        
+    }
+    public static string ToPropertyName(string str){
+        string name = "";
+        int i = 1;
+        while(str[i] != '>'){
+            name += str[i];
+            i++;
+        }
+        return ToUpperFirstLetter(name);        
+    }
+
+    public static string ToInspectorName(string str){
+        if(str[0] != '<')
+            return ToUpperFirstLetter(str);
+        else 
+            return ToPropertyName(str);
     }
 
     public static void InvokeFunctionWithDelay(Action action, double delayTime){

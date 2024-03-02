@@ -60,20 +60,12 @@ public class InspectorView : VisualElement
                 Type curType = stack.Pop();
                 var fields = curType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
                 foreach(var field in fields){
-                    
                     if(!field.IsPublic && field.GetCustomAttribute<SerializeField>(true) == null) continue;
                     if(field.GetCustomAttribute<HideInInspector>(true) != null) continue;
                     if(field.GetCustomAttribute<NonSerializedAttribute>(true) != null) continue;
-                    string name;
-                    if(field.Name.Length == 0){
-                        name = "";
-                    }
-                    else if(field.Name.Length == 1){
-                        name = char.ToUpper(field.Name[0]).ToString();
-                    }
-                    else{
-                        name = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
-                    }
+                    string name = PCEditorUtility.ToInspectorName(field.Name);
+                    
+                    
                     if(field.FieldType == typeof(int)){
                         IntegerField intField = new IntegerField(){
                             label = name
