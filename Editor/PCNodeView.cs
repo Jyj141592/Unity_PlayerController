@@ -104,8 +104,10 @@ public class PCNodeView : Node
                 edgeView.transitionIndex = i;
                 outputPort.Connect(edgeView);
                 property.MoveArrayElement(i, i + 1);
+                edgeView.transition = node.transition[i];
             }
             outputPort.Connect(edge);
+            edge.transition = node.transition[to];
             for(int i = to + 1; i < list.Count(); i++){
                 edgeView = list[i] as PCEdgeView;
                 edgeView.transitionIndex = i;
@@ -119,10 +121,12 @@ public class PCNodeView : Node
                 outputPort.Connect(edgeView);
             }
             outputPort.Connect(edge);
+            edge.transition = node.transition[to];
             for(int i = to + 1; i <= from; i++){
                 edgeView = list[i - 1] as PCEdgeView;
                 edgeView.transitionIndex = i;
                 outputPort.Connect(edgeView);
+                edgeView.transition = node.transition[i];
             }
             for(int i = from; i > to; i--){
                 property.MoveArrayElement(i, i - 1);
@@ -134,7 +138,8 @@ public class PCNodeView : Node
             }
         }
         obj.ApplyModifiedProperties();
-        AssetDatabase.SaveAssets();
+        if(!Application.isPlaying)
+            AssetDatabase.SaveAssets();
     }
     
     public string OnNodeNameChanged(string oldVal, string newVal){

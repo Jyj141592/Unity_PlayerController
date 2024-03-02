@@ -88,7 +88,7 @@ public class PCWindow : EditorWindow
              pingAsset.clicked += () => EditorGUIUtility.PingObject(entry);
             LoadGraphView(entry);
             parameterView.Init(entry);
-            edgeInspector.Init(entry.parameterList);
+            edgeInspector.Init(parameterView);
         }
         else{
             overlay.style.visibility = Visibility.Visible;

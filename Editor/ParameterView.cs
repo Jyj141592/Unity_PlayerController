@@ -25,11 +25,12 @@ public class ParameterView : VisualElement
     private double clickedTime = 0;
     private SearchOption searchOption = SearchOption.Name;
     private string searchName = null;
+    public Action onAddOrDeleted;
 
     //private List<string> test = new List<string>{"one", "two", "three", "four", "five"};
     
     private PlayerControllerAsset asset;
-    private ParameterList parameterList;
+    public ParameterList parameterList;
 #region Initialize
     public ParameterView(){
         Undo.undoRedoPerformed += UndoRedoPerformed;
@@ -273,7 +274,8 @@ public class ParameterView : VisualElement
         p2.GetArrayElementAtIndex(index).FindPropertyRelative("type").SetEnumValue(type);
         obj.ApplyModifiedProperties();
 
-        AssetDatabase.SaveAssets();
+        if(!Application.isPlaying)
+            AssetDatabase.SaveAssets();
             
         LoadParameterView(SearchOption.Name, null);
         
@@ -282,6 +284,7 @@ public class ParameterView : VisualElement
         listView.ScrollToItem(index);
         Label label = listView.GetRootElementForId(index).Q<Label>();
         ChangeParamName(label);
+        onAddOrDeleted?.Invoke();
     }
 
     private void ChangeParamName(Label label){
@@ -302,6 +305,7 @@ public class ParameterView : VisualElement
                 property.FindPropertyRelative("name").stringValue = newName;
                 property.FindPropertyRelative("paramID").intValue = Animator.StringToHash(newName);
                 obj.ApplyModifiedProperties();
+                onAddOrDeleted?.Invoke();
             }
             label.Remove(textField);
         });
@@ -354,6 +358,7 @@ public class ParameterView : VisualElement
             property.DeleteArrayElementAtIndex(selected);
             obj.ApplyModifiedProperties();
             LoadParameterView(searchOption, searchName);
+            onAddOrDeleted?.Invoke();
         }
     }
 
@@ -374,6 +379,12 @@ public class ParameterView : VisualElement
     public void OnDestroy(){
         Undo.undoRedoPerformed -= UndoRedoPerformed;
         listView.UnregisterCallback<KeyDownEvent>(OnKeyDown);
+    }
+    public int ParameterIndex(string name){
+        if(names.ContainsKey(name)){
+            return names[name];
+        }
+        else return -1;
     }
 #endregion Utility
 }

@@ -7,5 +7,9 @@ public class Log : PCNode
 {
     [SerializeField]
     public string log;
+    [field: SerializeField]
+    public int testProperty{
+        get; set;
+    }
 }
 }

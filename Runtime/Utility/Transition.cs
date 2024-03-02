@@ -10,6 +10,7 @@ public class Transition// : ScriptableObject
     public PCNode dest;
     public bool mute = false;
     public int testValue;
+    [HideInInspector]
     public List<Condition> conditions;
     public Transition(PCNode node){
         dest = node;

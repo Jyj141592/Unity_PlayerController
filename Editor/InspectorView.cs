@@ -54,6 +54,7 @@ public class InspectorView : VisualElement
             foreach(var field in fields){
                 if(!field.IsPublic && field.GetCustomAttribute<SerializeField>(true) == null) continue;
                 if(field.GetCustomAttribute<HideInInspector>(true) != null) continue;
+                if(field.GetCustomAttribute<NonSerializedAttribute>(true) != null) continue;
                 if(field.FieldType == typeof(int)){
                     IntegerField intField = new IntegerField(){
                         label = field.Name

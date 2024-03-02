@@ -149,6 +149,7 @@ public class PCGraphView : GraphView
         int pos = output.node.transition.Count;
         property.InsertArrayElementAtIndex(pos);
         property.GetArrayElementAtIndex(pos).FindPropertyRelative("dest").objectReferenceValue = input.node;
+        property.GetArrayElementAtIndex(pos).FindPropertyRelative("conditions").ClearArray();
 
         obj.ApplyModifiedProperties();
         //SerializedProperty property = obj.FindProperty("transition");

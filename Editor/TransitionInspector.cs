@@ -18,6 +18,7 @@ public class TransitionInspector : VisualElement
     private PCEdgeView edge;
     private PCNodeView nodeView;
     private ParameterList parameterList;
+    private ParameterView parameterView;
     private Label transitionName;
     private Foldout foldout;
     private ListView listView;
@@ -26,8 +27,11 @@ public class TransitionInspector : VisualElement
     public TransitionInspector(){
         Undo.undoRedoPerformed += OnUndoRedoPerformed;
     }
-    public void Init(ParameterList list){
-        parameterList = list;
+    public void Init(ParameterView view){
+        parameterView = view;
+        parameterList = view.parameterList;
+        parameterView.onAddOrDeleted -= OnParameterChanged;
+        parameterView.onAddOrDeleted += OnParameterChanged;
         foldout = this.Q<Foldout>();
         listView = this.Q<ListView>();
         button = this.Q<Button>();
@@ -36,17 +40,56 @@ public class TransitionInspector : VisualElement
         listView.selectionType = SelectionType.Single;
         listView.RegisterCallback<KeyDownEvent>(OnKeyDown, TrickleDown.TrickleDown);
         listView.makeItem = () => {
-            VisualElement root = new VisualElement();
-            root.style.flexDirection = FlexDirection.Row;
-            DropdownField dropdownField = new DropdownField();
+            ConditionElement element = new ConditionElement();
             foreach(var p in parameterList.parameters){
-                dropdownField.choices.Add(p.GetName());
+                element.dropdown.choices.Add(p.GetName());
             }
-            root.Add(dropdownField);
-            return root;
+            return element;
         };
         listView.bindItem = (e, i) => {
+            string name = edge.transition.conditions[i].GetName();
+            int index = parameterView.ParameterIndex(name);
+            ConditionElement element = e as ConditionElement;
+            element.index = i;
+            element.dropdown.RegisterValueChangedCallback((callback) => {
+                int idx = parameterView.ParameterIndex(callback.newValue);
+                ParameterType t = parameterList.parameters[idx].GetParameterType();
+                SerializedObject obj = new SerializedObject(nodeView.node);
+                SerializedProperty p = obj.FindProperty("transition").GetArrayElementAtIndex(edge.transitionIndex).FindPropertyRelative("conditions").GetArrayElementAtIndex(i);
+                p.FindPropertyRelative("paramName").stringValue = callback.newValue;
+                p.FindPropertyRelative("paramID").intValue = Animator.StringToHash(callback.newValue);
+                obj.ApplyModifiedProperties();
 
+                switch(t){
+                    case ParameterType.Bool:
+                    element.ChangeToBool(nodeView.node, edge.transitionIndex);
+                    break;
+                    case ParameterType.Float:
+                    element.ChangeToFloat(nodeView.node, edge.transitionIndex);
+                    break;
+                    case ParameterType.Int:
+                    element.ChangeToInt(nodeView.node, edge.transitionIndex);
+                    break;
+                }
+            });
+            if(index < 0){
+                element.ParameterNotExist();
+            }
+            else{
+                element.dropdown.SetValueWithoutNotify(name);
+                ParameterType t = parameterList.parameters[index].GetParameterType();
+                switch(t){
+                    case ParameterType.Bool:
+                    element.ChangeToBool(nodeView.node, edge.transitionIndex);
+                    break;
+                    case ParameterType.Float:
+                    element.ChangeToFloat(nodeView.node, edge.transitionIndex);
+                    break;
+                    case ParameterType.Int:
+                    element.ChangeToInt(nodeView.node, edge.transitionIndex);
+                    break;
+                }
+            }
         };
 
         button.clicked -= AddCondition;
@@ -68,11 +111,11 @@ public class TransitionInspector : VisualElement
         var fields = typeof(Transition).GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
         foreach(var field in fields){
             if(!field.IsPublic && field.GetCustomAttribute<SerializeField>(true) == null) continue;
-            if(field.GetCustomAttribute<HideInInspector>(true) != null) continue;
             if(field.Name.Equals("conditions")){
                 LoadListView();
                 return;
             }
+            if(field.GetCustomAttribute<HideInInspector>(true) != null) continue;
             if(field.FieldType == typeof(int)){
                 IntegerField intField = new IntegerField(){
                     label = field.Name
@@ -141,14 +184,17 @@ public class TransitionInspector : VisualElement
         }
         foldout.Clear();
         listView.Clear();
+        listView.itemsSource = null;
+        listView.Rebuild();
     }
     public void LoadListView(){
         listView.Clear();
-        listView.itemsSource = edge.transition.conditions.ToList();
+        listView.itemsSource = edge?.transition.conditions.ToList();
         listView.Rebuild();
     }
     private void AddCondition(){
         if(parameterList.parameters.Count <= 0) return;
+        if(nodeView == null) return;
         Parameter param = parameterList.parameters[0];
         SerializedObject obj = new SerializedObject(nodeView.node);
         SerializedProperty property = obj.FindProperty("transition").GetArrayElementAtIndex(edge.transitionIndex).FindPropertyRelative("conditions");
@@ -161,7 +207,7 @@ public class TransitionInspector : VisualElement
         property = property.FindPropertyRelative("condition");
         switch(param.GetParameterType()){
             case ParameterType.Bool:
-            property.SetEnumValue(TransitionCondition.Bool_False);
+            property.SetEnumValue(TransitionCondition.Bool_True);
             break;
             case ParameterType.Float:
             property.SetEnumValue(TransitionCondition.Float_Greater);
@@ -178,13 +224,178 @@ public class TransitionInspector : VisualElement
     }
 
     private void OnKeyDown(KeyDownEvent ev){
-
+        if(ev.keyCode == KeyCode.Delete){
+            int selected = listView.selectedIndex;
+            if(selected < 0) return;
+            SerializedObject obj = new SerializedObject(nodeView.node);
+            SerializedProperty property = obj.FindProperty("transition").GetArrayElementAtIndex(edge.transitionIndex).FindPropertyRelative("conditions");
+            property.DeleteArrayElementAtIndex(selected);
+            obj.ApplyModifiedProperties();
+            LoadListView();
+        }
     }
     private void OnEdgeUpdated(){
         UpdateInspector(edge);
     }
     private void OnEdgeDeleted(){
         ClearInspector();
+    }
+    private void OnParameterChanged(){
+        LoadListView();
+    }
+
+    private class ConditionElement : VisualElement{
+        public DropdownField dropdown;
+        public VisualElement control;
+        public int index;
+        public ConditionElement(){
+            VisualElement drop = new VisualElement();
+            drop.style.flexGrow = 1;
+            dropdown = new DropdownField();
+            control = new VisualElement();
+            control.style.flexDirection = FlexDirection.Row;
+            dropdown.style.flexGrow = control.style.flexGrow = 1;
+            this.style.flexDirection = FlexDirection.Row;
+            drop.Add(dropdown);
+            this.Add(drop);
+            this.Add(control);
+        }
+        public void ParameterNotExist(){
+            control.Clear();
+            control.Add(new Label("Parameter does not exist"));
+        }
+        public void ChangeToBool(PCNode node, int edgeIdx){
+            control.Clear();
+            DropdownField d = new DropdownField();
+            d.style.flexGrow = 1;
+            d.choices.Add("true");
+            d.choices.Add("false");
+            TransitionCondition c = node.transition[edgeIdx].conditions[index].GetTransitionCondition();
+            if(c == TransitionCondition.Bool_False){
+                d.SetValueWithoutNotify("false");
+            }
+            else if(c == TransitionCondition.Bool_True){
+                d.SetValueWithoutNotify("true");
+            }
+            else{
+                SerializedObject obj = new SerializedObject(node);
+                SerializedProperty p = obj.FindProperty("transition").GetArrayElementAtIndex(edgeIdx).FindPropertyRelative("conditions").GetArrayElementAtIndex(index);
+                p.FindPropertyRelative("condition").SetEnumValue(TransitionCondition.Bool_True);
+                p.FindPropertyRelative("value").floatValue = 0;
+                obj.ApplyModifiedProperties();
+                d.SetValueWithoutNotify("true");
+            }
+            d.RegisterValueChangedCallback((callback) => {
+                TransitionCondition t = callback.newValue.Equals("false") ? TransitionCondition.Bool_False : TransitionCondition.Bool_True;
+                SerializedObject obj = new SerializedObject(node);
+                SerializedProperty p = obj.FindProperty("transition").GetArrayElementAtIndex(edgeIdx).FindPropertyRelative("conditions").GetArrayElementAtIndex(index);
+                p.FindPropertyRelative("condition").SetEnumValue(t);
+                obj.ApplyModifiedProperties();
+            });
+            control.Add(d);
+        }
+        public void ChangeToFloat(PCNode node, int edgeIdx){
+            control.Clear();
+            DropdownField d = new DropdownField();
+            d.style.flexGrow = 1;
+
+            d.choices.Add("Greater");
+            d.choices.Add("Less");
+            TransitionCondition c = node.transition[edgeIdx].conditions[index].GetTransitionCondition();
+            if(c == TransitionCondition.Float_Greater){
+                d.SetValueWithoutNotify("Greater");
+            }
+            else if(c == TransitionCondition.Float_Less){
+                d.SetValueWithoutNotify("Less");
+            }
+            else{
+                SerializedObject obj = new SerializedObject(node);
+                SerializedProperty p = obj.FindProperty("transition").GetArrayElementAtIndex(edgeIdx).FindPropertyRelative("conditions").GetArrayElementAtIndex(index);
+                p.FindPropertyRelative("condition").SetEnumValue(TransitionCondition.Float_Greater);
+                p.FindPropertyRelative("value").floatValue = 0;
+                obj.ApplyModifiedProperties();
+                d.SetValueWithoutNotify("Greater");
+            }
+            d.RegisterValueChangedCallback((callback) => {
+                TransitionCondition t = callback.newValue.Equals("Greater") ? TransitionCondition.Float_Greater : TransitionCondition.Float_Less;
+                SerializedObject obj = new SerializedObject(node);
+                SerializedProperty p = obj.FindProperty("transition").GetArrayElementAtIndex(edgeIdx).FindPropertyRelative("conditions").GetArrayElementAtIndex(index);
+                p.FindPropertyRelative("condition").SetEnumValue(t);
+                obj.ApplyModifiedProperties();
+            });
+            control.Add(d);
+
+            FloatField f = new FloatField();
+            f.style.flexGrow = 1;
+            f.isDelayed = true;
+            f.style.minWidth = 50;
+
+            f.SetValueWithoutNotify(node.transition[edgeIdx].conditions[index].GetFloat());
+            f.RegisterValueChangedCallback((callback) => {
+                SerializedObject obj = new SerializedObject(node);
+                SerializedProperty p = obj.FindProperty("transition").GetArrayElementAtIndex(edgeIdx).FindPropertyRelative("conditions").GetArrayElementAtIndex(index);
+                p.FindPropertyRelative("value").floatValue = callback.newValue;
+                obj.ApplyModifiedProperties();
+            });
+            control.Add(f);
+        }
+        public void ChangeToInt(PCNode node, int edgeIdx){
+            control.Clear();
+            DropdownField d = new DropdownField();
+            d.style.flexGrow = 1;
+
+            d.choices.Add("Greater");
+            d.choices.Add("Equal");
+            d.choices.Add("Less");
+            TransitionCondition c = node.transition[edgeIdx].conditions[index].GetTransitionCondition();
+            if(c == TransitionCondition.Int_Equal){
+                d.SetValueWithoutNotify("Equal");
+            }
+            else if(c == TransitionCondition.Int_Greater){
+                d.SetValueWithoutNotify("Greater");
+            }
+            else if(c == TransitionCondition.Int_Less){
+                d.SetValueWithoutNotify("Less");
+            }
+            else{
+                SerializedObject obj = new SerializedObject(node);
+                SerializedProperty p = obj.FindProperty("transition").GetArrayElementAtIndex(edgeIdx).FindPropertyRelative("conditions").GetArrayElementAtIndex(index);
+                p.FindPropertyRelative("condition").SetEnumValue(TransitionCondition.Int_Greater);
+                p.FindPropertyRelative("value").floatValue = 0;
+                obj.ApplyModifiedProperties();
+                d.SetValueWithoutNotify("Greater");
+            }
+            d.RegisterValueChangedCallback((callback) => {
+                TransitionCondition t;
+                if(callback.newValue.Equals("Greater")){
+                    t = TransitionCondition.Int_Greater;
+                }
+                else if(callback.newValue.Equals("Equal")){
+                    t = TransitionCondition.Int_Equal;
+                }
+                else{
+                    t = TransitionCondition.Int_Less;
+                }
+                SerializedObject obj = new SerializedObject(node);
+                SerializedProperty p = obj.FindProperty("transition").GetArrayElementAtIndex(edgeIdx).FindPropertyRelative("conditions").GetArrayElementAtIndex(index);
+                p.FindPropertyRelative("condition").SetEnumValue(t);
+                obj.ApplyModifiedProperties();
+            });
+            control.Add(d);
+
+            IntegerField i = new IntegerField();
+            i.style.flexGrow = 1;
+            i.isDelayed = true;
+
+            i.SetValueWithoutNotify(node.transition[edgeIdx].conditions[index].GetInt());
+            i.RegisterValueChangedCallback((callback) => {
+                SerializedObject obj = new SerializedObject(node);
+                SerializedProperty p = obj.FindProperty("transition").GetArrayElementAtIndex(edgeIdx).FindPropertyRelative("conditions").GetArrayElementAtIndex(index);
+                p.FindPropertyRelative("value").floatValue = callback.newValue;
+                obj.ApplyModifiedProperties();
+            });
+            control.Add(i);
+        }
     }
 }
 }
