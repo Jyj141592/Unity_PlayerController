@@ -332,7 +332,6 @@ public class PCGraphView : GraphView
         nodeNames.Add(newName);
         return newName;
     }
-
 #endregion Utility
 }
 }

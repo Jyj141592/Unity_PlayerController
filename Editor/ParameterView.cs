@@ -328,7 +328,36 @@ public class ParameterView : VisualElement
         LoadParameterView(SearchOption.Name, null);
     }
 
+    private void DeleteParameter(int index){
+        SerializedObject obj = new SerializedObject(asset);
+        SerializedProperty property = obj.FindProperty("_parameterList").FindPropertyRelative("_parameters");
+        property.DeleteArrayElementAtIndex(index);
+        obj.ApplyModifiedProperties();
+        LoadParameterView(searchOption, searchName);
+        onAddOrDeleted?.Invoke();
+    }
 
+    private List<string> FindParameterUsage(string paramName){
+        List<string> transitions = new List<string>();
+        transitions.AddRange(FindParameterUsageInNode(asset, paramName));
+        transitions.AddRange(FindParameterUsageInNode(asset.anyState, paramName));
+        foreach(var node in asset.nodes){
+            transitions.AddRange(FindParameterUsageInNode(node, paramName));
+        }
+        return transitions;
+    }
+    private List<string> FindParameterUsageInNode(PCNode node, string paramName){
+        List<string> transitions = new List<string>();
+        foreach(var transition in node.transitions){
+            foreach(var condition in transition.conditions){
+                if(condition.paramName.Equals(paramName)){
+                    transitions.Add(node.actionName + " -> " + transition.dest.actionName);
+                    break;
+                }
+            }
+        }
+        return transitions;
+    }
 #endregion Modify List
 
 #region Utility
@@ -343,7 +372,6 @@ public class ParameterView : VisualElement
         clickedTime = EditorApplication.timeSinceStartup;
         clickedIndex = listView.selectedIndex;
         if(prevIdx == clickedIndex && clickedTime - prevTime < 0.3){
-            //Debug.Log("double clicked");
             return true;
         }
         return false;
@@ -353,12 +381,21 @@ public class ParameterView : VisualElement
         if(ev.keyCode == KeyCode.Delete){
             int selected = listView.selectedIndex;
             if(selected < 0) return;
-            SerializedObject obj = new SerializedObject(asset);
-            SerializedProperty property = obj.FindProperty("_parameterList").FindPropertyRelative("_parameters");
-            property.DeleteArrayElementAtIndex(selected);
-            obj.ApplyModifiedProperties();
-            LoadParameterView(searchOption, searchName);
-            onAddOrDeleted?.Invoke();
+            List<string> usage = FindParameterUsage(parameterList.parameters[selected].name);
+            if(usage.Count == 0){
+                DeleteParameter(selected);
+            }
+            else{
+                string useList = "It is used by : \n";
+                foreach(string str in usage){
+                    useList += str + "\n";
+                }
+                bool del = EditorUtility.DisplayDialog("Delete Parameter " + parameterList.parameters[selected].name + '?',
+                useList, "Delete", "Cancel");
+                if(del){
+                    DeleteParameter(selected);
+                }
+            }
         }
     }
 
