@@ -332,6 +332,12 @@ public class PCGraphView : GraphView
         nodeNames.Add(newName);
         return newName;
     }
+
+    public void UpdateState(){
+        foreach(var node in nodeViews){
+            node.Value.OnStateUpdate();
+        }
+    }
 #endregion Utility
 }
 }

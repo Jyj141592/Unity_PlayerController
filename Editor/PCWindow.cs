@@ -28,6 +28,7 @@ public class PCWindow : EditorWindow
     public int instanceID;
     //public string guid;
     public string path = null;
+    private bool isPlaying = false;
 
 #region Initialize
     public static PCWindow Open(string title, int instanceID){
@@ -107,9 +108,19 @@ public class PCWindow : EditorWindow
 
 #region Callbacks
     public void OnSelectionChange() {
-        if(AssetDatabase.LoadAssetAtPath<PlayerControllerAsset>(path) == null) {
+        var asset = AssetDatabase.LoadAssetAtPath<PlayerControllerAsset>(path);
+        if(asset == null) {
             graphView?.ClearGraph();
             overlay.style.visibility = Visibility.Visible;
+        }
+        if(Application.isPlaying){
+            if(Selection.activeGameObject){
+                PlayerController controller = Selection.activeGameObject.GetComponent<PlayerController>();
+                if(controller != null && controller.playerControllerAsset.guid.Equals(asset.guid)) {
+                    graphView?.LoadGraph(controller.playerControllerAsset);
+                    isPlaying = true;
+                }
+            }
         }
     }
 
@@ -124,13 +135,32 @@ public class PCWindow : EditorWindow
     public void OnEnable() {
         if(path != null && !openedWnd.ContainsKey(path)){
             openedWnd.Add(path, this);
-        }        
+        }    
+        isPlaying = false;    
+        EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
+        EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
     }
 
-    // public void OnInspectorUpdate() {
-        
-    // }
-
+    public void OnInspectorUpdate() {
+        if(isPlaying){
+            graphView?.UpdateState();
+        }
+    }
+    
+    public void OnPlayModeStateChanged(PlayModeStateChange chg){
+        switch(chg){
+            case PlayModeStateChange.EnteredEditMode:
+            isPlaying = false;
+            var asset = AssetDatabase.LoadAssetAtPath<PlayerControllerAsset>(path);
+            if(asset != null && graphView != null){
+                graphView.LoadGraph(asset);
+            }
+            break;
+            // case PlayModeStateChange.EnteredPlayMode:
+            // isPlaying = true;
+            // break;
+        }
+    }
     public void OnNodeSelected(PCNodeView nodeView){
         nodeInspector?.UpdateInspector(nodeView);
     }

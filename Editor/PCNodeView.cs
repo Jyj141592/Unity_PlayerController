@@ -169,6 +169,15 @@ public class PCNodeView : Node
         }
         onUpdated?.Invoke();
     }
+
+    public void OnStateUpdate(){
+        if(node.state == PCNode.NodeState.Runnning){
+            this.style.color = Color.yellow;
+        }
+        else{
+            this.style.color = defaultColor;
+        }
+    }
 #endregion Callbacks
 }
 }

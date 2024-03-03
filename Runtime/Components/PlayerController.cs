@@ -4,6 +4,6 @@ using UnityEngine;
 namespace PlayerController{
 public class PlayerController : MonoBehaviour
 {
-    
+    public PlayerControllerAsset playerControllerAsset;
 }
 }
