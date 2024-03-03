@@ -10,21 +10,27 @@ public enum TransitionCondition{
 [Serializable]
 public class Condition
 {
-    //[SerializeField]
-    public string paramName;
     [SerializeField]
-    private int paramID;
+    private string _paramName;
+    public string paramName{
+        get => _paramName;
+        private set => _paramName = value;
+    }
+    [SerializeField]
+    private int _paramID;
+    public int paramID{
+        get => _paramID;
+        private set => _paramID = value;
+    }
     private int paramIndex;
     [SerializeField]
-    private TransitionCondition condition;
+    private TransitionCondition _condition;
+    public TransitionCondition condition{
+        get => _condition;
+        private set => _condition = value;
+    }
     [SerializeField]
     private float value;
-    public string GetName(){
-        return paramName;
-    }
-    public TransitionCondition GetTransitionCondition(){
-        return condition;
-    }
     public float GetFloat(){
         return value;
     }

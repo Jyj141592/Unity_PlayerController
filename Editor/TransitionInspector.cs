@@ -47,7 +47,7 @@ public class TransitionInspector : VisualElement
             return element;
         };
         listView.bindItem = (e, i) => {
-            string name = edge.transition.conditions[i].GetName();
+            string name = edge.transition.conditions[i].paramName;
             int index = parameterView.ParameterIndex(name);
             ConditionElement element = e as ConditionElement;
             element.index = i;
@@ -56,8 +56,8 @@ public class TransitionInspector : VisualElement
                 ParameterType t = parameterList.parameters[idx].paramType;
                 SerializedObject obj = new SerializedObject(nodeView.node);
                 SerializedProperty p = obj.FindProperty("_transitions").GetArrayElementAtIndex(edge.transitionIndex).FindPropertyRelative("_conditions").GetArrayElementAtIndex(i);
-                p.FindPropertyRelative("paramName").stringValue = callback.newValue;
-                p.FindPropertyRelative("paramID").intValue = Animator.StringToHash(callback.newValue);
+                p.FindPropertyRelative("_paramName").stringValue = callback.newValue;
+                p.FindPropertyRelative("_paramID").intValue = Animator.StringToHash(callback.newValue);
                 obj.ApplyModifiedProperties();
 
                 switch(t){
@@ -202,10 +202,11 @@ public class TransitionInspector : VisualElement
         int index = edge.transition.conditions.Count;
         property.InsertArrayElementAtIndex(index);
         property = property.GetArrayElementAtIndex(index);
-        property.FindPropertyRelative("paramName").stringValue = param.name;
-        property.FindPropertyRelative("paramID").intValue = param.paramID;
+        property.boxedValue = new Condition();
+        property.FindPropertyRelative("_paramName").stringValue = param.name;
+        property.FindPropertyRelative("_paramID").intValue = param.paramID;
         property.FindPropertyRelative("value").floatValue = 0;
-        property = property.FindPropertyRelative("condition");
+        property = property.FindPropertyRelative("_condition");
         switch(param.paramType){
             case ParameterType.Bool:
             property.SetEnumValue(TransitionCondition.Bool_True);
@@ -271,7 +272,7 @@ public class TransitionInspector : VisualElement
             d.style.flexGrow = 1;
             d.choices.Add("true");
             d.choices.Add("false");
-            TransitionCondition c = node.transitions[edgeIdx].conditions[index].GetTransitionCondition();
+            TransitionCondition c = node.transitions[edgeIdx].conditions[index].condition;
             if(c == TransitionCondition.Bool_False){
                 d.SetValueWithoutNotify("false");
             }
@@ -281,7 +282,7 @@ public class TransitionInspector : VisualElement
             else{
                 SerializedObject obj = new SerializedObject(node);
                 SerializedProperty p = obj.FindProperty("_transitions").GetArrayElementAtIndex(edgeIdx).FindPropertyRelative("_conditions").GetArrayElementAtIndex(index);
-                p.FindPropertyRelative("condition").SetEnumValue(TransitionCondition.Bool_True);
+                p.FindPropertyRelative("_condition").SetEnumValue(TransitionCondition.Bool_True);
                 p.FindPropertyRelative("value").floatValue = 0;
                 obj.ApplyModifiedProperties();
                 d.SetValueWithoutNotify("true");
@@ -290,7 +291,7 @@ public class TransitionInspector : VisualElement
                 TransitionCondition t = callback.newValue.Equals("false") ? TransitionCondition.Bool_False : TransitionCondition.Bool_True;
                 SerializedObject obj = new SerializedObject(node);
                 SerializedProperty p = obj.FindProperty("_transitions").GetArrayElementAtIndex(edgeIdx).FindPropertyRelative("_conditions").GetArrayElementAtIndex(index);
-                p.FindPropertyRelative("condition").SetEnumValue(t);
+                p.FindPropertyRelative("_condition").SetEnumValue(t);
                 obj.ApplyModifiedProperties();
             });
             control.Add(d);
@@ -302,7 +303,7 @@ public class TransitionInspector : VisualElement
 
             d.choices.Add("Greater");
             d.choices.Add("Less");
-            TransitionCondition c = node.transitions[edgeIdx].conditions[index].GetTransitionCondition();
+            TransitionCondition c = node.transitions[edgeIdx].conditions[index].condition;
             if(c == TransitionCondition.Float_Greater){
                 d.SetValueWithoutNotify("Greater");
             }
@@ -312,7 +313,7 @@ public class TransitionInspector : VisualElement
             else{
                 SerializedObject obj = new SerializedObject(node);
                 SerializedProperty p = obj.FindProperty("_transitions").GetArrayElementAtIndex(edgeIdx).FindPropertyRelative("_conditions").GetArrayElementAtIndex(index);
-                p.FindPropertyRelative("condition").SetEnumValue(TransitionCondition.Float_Greater);
+                p.FindPropertyRelative("_condition").SetEnumValue(TransitionCondition.Float_Greater);
                 p.FindPropertyRelative("value").floatValue = 0;
                 obj.ApplyModifiedProperties();
                 d.SetValueWithoutNotify("Greater");
@@ -321,7 +322,7 @@ public class TransitionInspector : VisualElement
                 TransitionCondition t = callback.newValue.Equals("Greater") ? TransitionCondition.Float_Greater : TransitionCondition.Float_Less;
                 SerializedObject obj = new SerializedObject(node);
                 SerializedProperty p = obj.FindProperty("_transitions").GetArrayElementAtIndex(edgeIdx).FindPropertyRelative("_conditions").GetArrayElementAtIndex(index);
-                p.FindPropertyRelative("condition").SetEnumValue(t);
+                p.FindPropertyRelative("_condition").SetEnumValue(t);
                 obj.ApplyModifiedProperties();
             });
             control.Add(d);
@@ -348,7 +349,7 @@ public class TransitionInspector : VisualElement
             d.choices.Add("Greater");
             d.choices.Add("Equal");
             d.choices.Add("Less");
-            TransitionCondition c = node.transitions[edgeIdx].conditions[index].GetTransitionCondition();
+            TransitionCondition c = node.transitions[edgeIdx].conditions[index].condition;
             if(c == TransitionCondition.Int_Equal){
                 d.SetValueWithoutNotify("Equal");
             }
@@ -361,7 +362,7 @@ public class TransitionInspector : VisualElement
             else{
                 SerializedObject obj = new SerializedObject(node);
                 SerializedProperty p = obj.FindProperty("_transitions").GetArrayElementAtIndex(edgeIdx).FindPropertyRelative("_conditions").GetArrayElementAtIndex(index);
-                p.FindPropertyRelative("condition").SetEnumValue(TransitionCondition.Int_Greater);
+                p.FindPropertyRelative("_condition").SetEnumValue(TransitionCondition.Int_Greater);
                 p.FindPropertyRelative("value").floatValue = 0;
                 obj.ApplyModifiedProperties();
                 d.SetValueWithoutNotify("Greater");
@@ -379,7 +380,7 @@ public class TransitionInspector : VisualElement
                 }
                 SerializedObject obj = new SerializedObject(node);
                 SerializedProperty p = obj.FindProperty("_transitions").GetArrayElementAtIndex(edgeIdx).FindPropertyRelative("_conditions").GetArrayElementAtIndex(index);
-                p.FindPropertyRelative("condition").SetEnumValue(t);
+                p.FindPropertyRelative("_condition").SetEnumValue(t);
                 obj.ApplyModifiedProperties();
             });
             control.Add(d);
