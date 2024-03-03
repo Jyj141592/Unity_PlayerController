@@ -266,6 +266,7 @@ public class ParameterView : VisualElement
         int index = parameterList.parameters.Count;
         string uName = GetUniqueName(name);
         p2.InsertArrayElementAtIndex(index);
+        p2.GetArrayElementAtIndex(index).boxedValue = new Parameter();
         p2.GetArrayElementAtIndex(index).FindPropertyRelative("_name").stringValue = uName;
         p2.GetArrayElementAtIndex(index).FindPropertyRelative("_paramID").intValue = Animator.StringToHash(uName);
         p2.GetArrayElementAtIndex(index).FindPropertyRelative("value").floatValue = 0;

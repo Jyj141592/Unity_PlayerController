@@ -89,7 +89,7 @@ public class InspectorView : VisualElement
                             label = name
                         };
                         textField.isDelayed = true;
-                        if(!foundName && field.Name.Equals("actionName")){
+                        if(!foundName && field.Name.Equals("_actionName")){
                             textField.value = (string) field.GetValue(nodeView.node);
                             textField.RegisterValueChangedCallback(callback => {
                                 string newName = nodeView.OnNodeNameChanged(callback.previousValue, callback.newValue);

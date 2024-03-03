@@ -162,8 +162,9 @@ public class PCGraphView : GraphView
         SerializedProperty property = obj.FindProperty("_transitions");
         int pos = output.node.transitions.Count;
         property.InsertArrayElementAtIndex(pos);
-        property.GetArrayElementAtIndex(pos).FindPropertyRelative("dest").objectReferenceValue = input.node;
-        property.GetArrayElementAtIndex(pos).FindPropertyRelative("conditions").ClearArray();
+        property.GetArrayElementAtIndex(pos).boxedValue = new Transition();
+        property.GetArrayElementAtIndex(pos).FindPropertyRelative("_dest").objectReferenceValue = input.node;
+        //property.GetArrayElementAtIndex(pos).FindPropertyRelative("_conditions").ClearArray();
 
         obj.ApplyModifiedProperties();
         //SerializedProperty property = obj.FindProperty("_transitions");
