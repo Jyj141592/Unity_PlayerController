@@ -122,11 +122,13 @@ public class PCGraphView : GraphView
     private void CreateAnyStateNode(PlayerControllerAsset asset){
         AnyState anyState = ScriptableObject.CreateInstance<AnyState>();
         anyState.Init("Any State", new Vector2(0, -100));
-        asset.anyState = anyState;
-        if(!Application.isPlaying){
+        SerializedObject obj = new SerializedObject(asset);
+        //if(!Application.isPlaying){
             AssetDatabase.AddObjectToAsset(anyState, asset);
             AssetDatabase.SaveAssets();
-        }
+        //}
+        obj.FindProperty("_anyState").objectReferenceValue = anyState;
+        obj.ApplyModifiedPropertiesWithoutUndo();
     }
     // Modifing Asset
     private PCNodeView CreateNodeView(System.Type type, Vector2 position){

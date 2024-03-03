@@ -10,12 +10,25 @@ namespace PlayerController{
 public class PlayerControllerAsset : PCNode
 {
     [HideInInspector]
-    public List<PCNode> nodes;
+    [SerializeField]
+    private List<PCNode> _nodes;
+    public List<PCNode> nodes{
+        get => _nodes;
+    }
+    //[HideInInspector]
+    [SerializeField]
+    private AnyState _anyState = null;
+    public AnyState anyState{
+        get => _anyState;
+    }
     [HideInInspector]
-    public AnyState anyState = null;
-    public ParameterList parameterList = null;
+    [SerializeField]
+    private ParameterList _parameterList = null;
+    public ParameterList parameterList{
+        get => _parameterList;
+    }
     public PlayerControllerAsset(){
-        parameterList = new ParameterList();
+        _parameterList = new ParameterList();
     }
 }
 }

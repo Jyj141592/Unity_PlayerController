@@ -73,7 +73,7 @@ public class ParameterView : VisualElement
             Label label = e.Q<Label>();
             //label.text = parameterList.parameters[i].GetName();
             SerializedObject obj = new SerializedObject(asset);
-            SerializedProperty property = obj.FindProperty("parameterList").FindPropertyRelative("parameters").GetArrayElementAtIndex(i);
+            SerializedProperty property = obj.FindProperty("_parameterList").FindPropertyRelative("parameters").GetArrayElementAtIndex(i);
             label.BindProperty(property.FindPropertyRelative("name"));
 
             Toggle toggle = e.Q<Toggle>();
@@ -89,7 +89,7 @@ public class ParameterView : VisualElement
                 toggle.RegisterValueChangedCallback((callback) => {
                     float val = callback.newValue ? 1 : 0;
                     SerializedObject obj = new SerializedObject(asset);
-                    SerializedProperty property = obj.FindProperty("parameterList").FindPropertyRelative("parameters").GetArrayElementAtIndex(i);
+                    SerializedProperty property = obj.FindProperty("_parameterList").FindPropertyRelative("parameters").GetArrayElementAtIndex(i);
                     property.FindPropertyRelative("value").floatValue = val;
                     obj.ApplyModifiedProperties();
                 });
@@ -102,7 +102,7 @@ public class ParameterView : VisualElement
                 intField.RegisterValueChangedCallback((callback) => {
                     float val = callback.newValue;
                     SerializedObject obj = new SerializedObject(asset);
-                    SerializedProperty property = obj.FindProperty("parameterList").FindPropertyRelative("parameters").GetArrayElementAtIndex(i);
+                    SerializedProperty property = obj.FindProperty("_parameterList").FindPropertyRelative("parameters").GetArrayElementAtIndex(i);
                     property.FindPropertyRelative("value").floatValue = val;
                     obj.ApplyModifiedProperties();
                 });
@@ -116,7 +116,7 @@ public class ParameterView : VisualElement
                 floatField.SetValueWithoutNotify(parameterList.parameters[i].GetFloat());
                 floatField.RegisterValueChangedCallback((callback) => {
                     SerializedObject obj = new SerializedObject(asset);
-                    SerializedProperty property = obj.FindProperty("parameterList").FindPropertyRelative("parameters").GetArrayElementAtIndex(i);
+                    SerializedProperty property = obj.FindProperty("_parameterList").FindPropertyRelative("parameters").GetArrayElementAtIndex(i);
 
                     property.FindPropertyRelative("value").floatValue = callback.newValue;
                     obj.ApplyModifiedProperties();
@@ -263,7 +263,7 @@ public class ParameterView : VisualElement
             break;
         }
         SerializedObject obj = new SerializedObject(asset);
-        SerializedProperty p1 = obj.FindProperty("parameterList");
+        SerializedProperty p1 = obj.FindProperty("_parameterList");
         SerializedProperty p2 = p1.FindPropertyRelative("parameters");
         int index = parameterList.parameters.Count;
         string uName = GetUniqueName(name);
@@ -301,7 +301,7 @@ public class ParameterView : VisualElement
                 newName = GetUniqueName(newName);
                 names.Add(newName, clickedIndex);
                 SerializedObject obj = new SerializedObject(asset);
-                SerializedProperty property = obj.FindProperty("parameterList").FindPropertyRelative("parameters").GetArrayElementAtIndex(clickedIndex);
+                SerializedProperty property = obj.FindProperty("_parameterList").FindPropertyRelative("parameters").GetArrayElementAtIndex(clickedIndex);
                 property.FindPropertyRelative("name").stringValue = newName;
                 property.FindPropertyRelative("paramID").intValue = Animator.StringToHash(newName);
                 obj.ApplyModifiedProperties();
@@ -314,7 +314,7 @@ public class ParameterView : VisualElement
 
     public void OnChangeListOrder(int oldPos, int newPos){
         SerializedObject obj = new SerializedObject(asset);
-        SerializedProperty property = obj.FindProperty("parameterList").FindPropertyRelative("parameters");
+        SerializedProperty property = obj.FindProperty("_parameterList").FindPropertyRelative("parameters");
         if(oldPos > newPos){
             for(int i = oldPos; i > newPos; i--){
                 property.MoveArrayElement(i, i - 1);
@@ -354,7 +354,7 @@ public class ParameterView : VisualElement
             int selected = listView.selectedIndex;
             if(selected < 0) return;
             SerializedObject obj = new SerializedObject(asset);
-            SerializedProperty property = obj.FindProperty("parameterList").FindPropertyRelative("parameters");
+            SerializedProperty property = obj.FindProperty("_parameterList").FindPropertyRelative("parameters");
             property.DeleteArrayElementAtIndex(selected);
             obj.ApplyModifiedProperties();
             LoadParameterView(searchOption, searchName);
