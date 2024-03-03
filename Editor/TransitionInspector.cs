@@ -42,7 +42,7 @@ public class TransitionInspector : VisualElement
         listView.makeItem = () => {
             ConditionElement element = new ConditionElement();
             foreach(var p in parameterList.parameters){
-                element.dropdown.choices.Add(p.GetName());
+                element.dropdown.choices.Add(p.name);
             }
             return element;
         };
@@ -53,7 +53,7 @@ public class TransitionInspector : VisualElement
             element.index = i;
             element.dropdown.RegisterValueChangedCallback((callback) => {
                 int idx = parameterView.ParameterIndex(callback.newValue);
-                ParameterType t = parameterList.parameters[idx].GetParameterType();
+                ParameterType t = parameterList.parameters[idx].paramType;
                 SerializedObject obj = new SerializedObject(nodeView.node);
                 SerializedProperty p = obj.FindProperty("_transitions").GetArrayElementAtIndex(edge.transitionIndex).FindPropertyRelative("conditions").GetArrayElementAtIndex(i);
                 p.FindPropertyRelative("paramName").stringValue = callback.newValue;
@@ -77,7 +77,7 @@ public class TransitionInspector : VisualElement
             }
             else{
                 element.dropdown.SetValueWithoutNotify(name);
-                ParameterType t = parameterList.parameters[index].GetParameterType();
+                ParameterType t = parameterList.parameters[index].paramType;
                 switch(t){
                     case ParameterType.Bool:
                     element.ChangeToBool(nodeView.node, edge.transitionIndex);
@@ -202,11 +202,11 @@ public class TransitionInspector : VisualElement
         int index = edge.transition.conditions.Count;
         property.InsertArrayElementAtIndex(index);
         property = property.GetArrayElementAtIndex(index);
-        property.FindPropertyRelative("paramName").stringValue = param.GetName();
-        property.FindPropertyRelative("paramID").intValue = param.GetID();
+        property.FindPropertyRelative("paramName").stringValue = param.name;
+        property.FindPropertyRelative("paramID").intValue = param.paramID;
         property.FindPropertyRelative("value").floatValue = 0;
         property = property.FindPropertyRelative("condition");
-        switch(param.GetParameterType()){
+        switch(param.paramType){
             case ParameterType.Bool:
             property.SetEnumValue(TransitionCondition.Bool_True);
             break;

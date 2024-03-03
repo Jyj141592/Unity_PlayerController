@@ -8,9 +8,14 @@ namespace PlayerController{
 [Serializable]
 public class ParameterList
 {
-    public List<Parameter> parameters;
+    //[HideInInspector]
+    [SerializeField]
+    private List<Parameter> _parameters;
+    public List<Parameter> parameters{
+        get => _parameters;
+    }
     public ParameterList(){
-        parameters = new List<Parameter>();
+        _parameters = new List<Parameter>();
     }
 
     public void Init(){

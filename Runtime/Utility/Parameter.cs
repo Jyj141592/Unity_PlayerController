@@ -10,22 +10,30 @@ public enum ParameterType{
 [Serializable]
 public class Parameter : IComparable<Parameter>, IComparable<int>
 {
+    //[HideInInspector]
     [SerializeField]
-    private ParameterType type;
+    private ParameterType _paramType;
+    public ParameterType paramType{
+        get => _paramType;
+        private set => _paramType = value;
+    }
+    //[HideInInspector]
     [SerializeField]
-    private string name;
+    private string _name;
+    public string name{
+        get => _name;
+        private set => _name = value;
+    }
+    //[HideInInspector]
     [SerializeField]
-    private int paramID;
+    private int _paramID;
+    public int paramID{
+        get => _paramID;
+        private set => _paramID = value;
+    }
     [SerializeField]
     private float value = 0;
-    public void SetName(string name){
-        this.name = name;
-        paramID = Animator.StringToHash(name);
-    }
-    public string GetName() {return name; }
-    public void SetParameterType(ParameterType type){ this.type = type; }
-    public ParameterType GetParameterType(){ return type; }
-    public int GetID(){ return paramID; }
+
     public virtual int GetInt(){ return (int)value; }
     public virtual void SetInt(int value){ this.value = value; }
     public virtual float GetFloat(){ return value; }

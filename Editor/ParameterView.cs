@@ -26,8 +26,6 @@ public class ParameterView : VisualElement
     private SearchOption searchOption = SearchOption.Name;
     private string searchName = null;
     public Action onAddOrDeleted;
-
-    //private List<string> test = new List<string>{"one", "two", "three", "four", "five"};
     
     private PlayerControllerAsset asset;
     public ParameterList parameterList;
@@ -69,12 +67,12 @@ public class ParameterView : VisualElement
             return container;
         };
         listView.bindItem = (e, j) => {
-            int i = names[(listView.itemsSource[j] as Parameter).GetName()];
+            int i = names[(listView.itemsSource[j] as Parameter).name];
             Label label = e.Q<Label>();
             //label.text = parameterList.parameters[i].GetName();
             SerializedObject obj = new SerializedObject(asset);
-            SerializedProperty property = obj.FindProperty("_parameterList").FindPropertyRelative("parameters").GetArrayElementAtIndex(i);
-            label.BindProperty(property.FindPropertyRelative("name"));
+            SerializedProperty property = obj.FindProperty("_parameterList").FindPropertyRelative("_parameters").GetArrayElementAtIndex(i);
+            label.BindProperty(property.FindPropertyRelative("_name"));
 
             Toggle toggle = e.Q<Toggle>();
             if(toggle != null) e.Remove(toggle);
@@ -83,26 +81,26 @@ public class ParameterView : VisualElement
             FloatField floatField = e.Q<FloatField>();
             if(floatField != null) e.Remove(floatField);
 
-            if(parameterList.parameters[i].GetParameterType() == ParameterType.Bool){
+            if(parameterList.parameters[i].paramType == ParameterType.Bool){
                 toggle = new Toggle();
                 toggle.SetValueWithoutNotify(parameterList.parameters[i].GetBool());
                 toggle.RegisterValueChangedCallback((callback) => {
                     float val = callback.newValue ? 1 : 0;
                     SerializedObject obj = new SerializedObject(asset);
-                    SerializedProperty property = obj.FindProperty("_parameterList").FindPropertyRelative("parameters").GetArrayElementAtIndex(i);
+                    SerializedProperty property = obj.FindProperty("_parameterList").FindPropertyRelative("_parameters").GetArrayElementAtIndex(i);
                     property.FindPropertyRelative("value").floatValue = val;
                     obj.ApplyModifiedProperties();
                 });
                 e.Add(toggle);
             }
-            else if(parameterList.parameters[i].GetParameterType() == ParameterType.Int){
+            else if(parameterList.parameters[i].paramType == ParameterType.Int){
                 intField = new IntegerField();
                 intField.isDelayed = true;
                 intField.SetValueWithoutNotify(parameterList.parameters[i].GetInt());
                 intField.RegisterValueChangedCallback((callback) => {
                     float val = callback.newValue;
                     SerializedObject obj = new SerializedObject(asset);
-                    SerializedProperty property = obj.FindProperty("_parameterList").FindPropertyRelative("parameters").GetArrayElementAtIndex(i);
+                    SerializedProperty property = obj.FindProperty("_parameterList").FindPropertyRelative("_parameters").GetArrayElementAtIndex(i);
                     property.FindPropertyRelative("value").floatValue = val;
                     obj.ApplyModifiedProperties();
                 });
@@ -110,13 +108,13 @@ public class ParameterView : VisualElement
                 intField.style.maxWidth = 45;
                 e.Add(intField);
             }
-            else if(parameterList.parameters[i].GetParameterType() == ParameterType.Float){
+            else if(parameterList.parameters[i].paramType == ParameterType.Float){
                 floatField = new FloatField();
                 floatField.isDelayed = true;
                 floatField.SetValueWithoutNotify(parameterList.parameters[i].GetFloat());
                 floatField.RegisterValueChangedCallback((callback) => {
                     SerializedObject obj = new SerializedObject(asset);
-                    SerializedProperty property = obj.FindProperty("_parameterList").FindPropertyRelative("parameters").GetArrayElementAtIndex(i);
+                    SerializedProperty property = obj.FindProperty("_parameterList").FindPropertyRelative("_parameters").GetArrayElementAtIndex(i);
 
                     property.FindPropertyRelative("value").floatValue = callback.newValue;
                     obj.ApplyModifiedProperties();
@@ -188,7 +186,7 @@ public class ParameterView : VisualElement
         names.Clear();
         int i = 0;
         foreach(var p in parameterList.parameters){
-            names.Add(p.GetName(), i);
+            names.Add(p.name, i);
             i++;
         }
         switch(searchOption){
@@ -214,7 +212,7 @@ public class ParameterView : VisualElement
         searchName = name;
         if(name == null || name.Equals("")) 
             listView.itemsSource = parameterList.parameters.ToList();
-        else listView.itemsSource = parameterList.parameters.Where((p) => p.GetName().Contains(name)).ToList();
+        else listView.itemsSource = parameterList.parameters.Where((p) => p.name.Contains(name)).ToList();
 
         listView.Rebuild();
     }
@@ -222,27 +220,27 @@ public class ParameterView : VisualElement
         searchOption = SearchOption.Bool;
         searchName = name;
         if(name == null || name.Equals(""))
-            listView.itemsSource = parameterList.parameters.Where((p) => p.GetParameterType() == ParameterType.Bool).ToList();
+            listView.itemsSource = parameterList.parameters.Where((p) => p.paramType == ParameterType.Bool).ToList();
         else
-            listView.itemsSource = parameterList.parameters.Where((p) => p.GetParameterType() == ParameterType.Bool && p.GetName().Contains(name)).ToList();
+            listView.itemsSource = parameterList.parameters.Where((p) => p.paramType == ParameterType.Bool && p.name.Contains(name)).ToList();
         listView.Rebuild();
     }
     private void SearchFloat(string name){
         searchOption = SearchOption.Float;
         searchName = name;
         if(name == null || name.Equals(""))
-            listView.itemsSource = parameterList.parameters.Where((p) => p.GetParameterType() == ParameterType.Float).ToList();
+            listView.itemsSource = parameterList.parameters.Where((p) => p.paramType == ParameterType.Float).ToList();
         else
-            listView.itemsSource = parameterList.parameters.Where((p) => p.GetParameterType() == ParameterType.Float && p.GetName().Contains(name)).ToList();
+            listView.itemsSource = parameterList.parameters.Where((p) => p.paramType == ParameterType.Float && p.name.Contains(name)).ToList();
         listView.Rebuild();
     }
     private void SearchInt(string name){
         searchOption = SearchOption.Int;
         searchName = name;
         if(name == null || name.Equals(""))
-            listView.itemsSource = parameterList.parameters.Where((p) => p.GetParameterType() == ParameterType.Int).ToList();
+            listView.itemsSource = parameterList.parameters.Where((p) => p.paramType == ParameterType.Int).ToList();
         else
-            listView.itemsSource = parameterList.parameters.Where((p) => p.GetParameterType() == ParameterType.Int && p.GetName().Contains(name)).ToList();
+            listView.itemsSource = parameterList.parameters.Where((p) => p.paramType == ParameterType.Int && p.name.Contains(name)).ToList();
         listView.Rebuild();
     }
 
@@ -264,14 +262,14 @@ public class ParameterView : VisualElement
         }
         SerializedObject obj = new SerializedObject(asset);
         SerializedProperty p1 = obj.FindProperty("_parameterList");
-        SerializedProperty p2 = p1.FindPropertyRelative("parameters");
+        SerializedProperty p2 = p1.FindPropertyRelative("_parameters");
         int index = parameterList.parameters.Count;
         string uName = GetUniqueName(name);
         p2.InsertArrayElementAtIndex(index);
-        p2.GetArrayElementAtIndex(index).FindPropertyRelative("name").stringValue = uName;
-        p2.GetArrayElementAtIndex(index).FindPropertyRelative("paramID").intValue = Animator.StringToHash(uName);
+        p2.GetArrayElementAtIndex(index).FindPropertyRelative("_name").stringValue = uName;
+        p2.GetArrayElementAtIndex(index).FindPropertyRelative("_paramID").intValue = Animator.StringToHash(uName);
         p2.GetArrayElementAtIndex(index).FindPropertyRelative("value").floatValue = 0;
-        p2.GetArrayElementAtIndex(index).FindPropertyRelative("type").SetEnumValue(type);
+        p2.GetArrayElementAtIndex(index).FindPropertyRelative("_paramType").SetEnumValue(type);
         obj.ApplyModifiedProperties();
 
         if(!Application.isPlaying)
@@ -301,9 +299,9 @@ public class ParameterView : VisualElement
                 newName = GetUniqueName(newName);
                 names.Add(newName, clickedIndex);
                 SerializedObject obj = new SerializedObject(asset);
-                SerializedProperty property = obj.FindProperty("_parameterList").FindPropertyRelative("parameters").GetArrayElementAtIndex(clickedIndex);
-                property.FindPropertyRelative("name").stringValue = newName;
-                property.FindPropertyRelative("paramID").intValue = Animator.StringToHash(newName);
+                SerializedProperty property = obj.FindProperty("_parameterList").FindPropertyRelative("_parameters").GetArrayElementAtIndex(clickedIndex);
+                property.FindPropertyRelative("_name").stringValue = newName;
+                property.FindPropertyRelative("_paramID").intValue = Animator.StringToHash(newName);
                 obj.ApplyModifiedProperties();
                 onAddOrDeleted?.Invoke();
             }
@@ -314,7 +312,7 @@ public class ParameterView : VisualElement
 
     public void OnChangeListOrder(int oldPos, int newPos){
         SerializedObject obj = new SerializedObject(asset);
-        SerializedProperty property = obj.FindProperty("_parameterList").FindPropertyRelative("parameters");
+        SerializedProperty property = obj.FindProperty("_parameterList").FindPropertyRelative("_parameters");
         if(oldPos > newPos){
             for(int i = oldPos; i > newPos; i--){
                 property.MoveArrayElement(i, i - 1);
@@ -326,6 +324,7 @@ public class ParameterView : VisualElement
             }
         }
         obj.ApplyModifiedProperties();
+        LoadParameterView(SearchOption.Name, null);
     }
 
 
@@ -354,7 +353,7 @@ public class ParameterView : VisualElement
             int selected = listView.selectedIndex;
             if(selected < 0) return;
             SerializedObject obj = new SerializedObject(asset);
-            SerializedProperty property = obj.FindProperty("_parameterList").FindPropertyRelative("parameters");
+            SerializedProperty property = obj.FindProperty("_parameterList").FindPropertyRelative("_parameters");
             property.DeleteArrayElementAtIndex(selected);
             obj.ApplyModifiedProperties();
             LoadParameterView(searchOption, searchName);

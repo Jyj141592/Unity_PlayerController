@@ -15,13 +15,13 @@ public class PlayerControllerAsset : PCNode
     public List<PCNode> nodes{
         get => _nodes;
     }
-    //[HideInInspector]
+    [HideInInspector]
     [SerializeField]
     private AnyState _anyState = null;
     public AnyState anyState{
         get => _anyState;
     }
-    [HideInInspector]
+    //[HideInInspector]
     [SerializeField]
     private ParameterList _parameterList = null;
     public ParameterList parameterList{
