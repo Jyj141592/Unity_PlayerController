@@ -5,7 +5,7 @@ using UnityEditor;
 using UnityEngine;
 
 namespace PlayerController{
-public class PCNode : ScriptableObject, IComparable<PCNode>
+public abstract class PCNode : ScriptableObject, IComparable<PCNode>
 {
     public enum NodeState{
         Wait, Runnning
@@ -47,14 +47,40 @@ public class PCNode : ScriptableObject, IComparable<PCNode>
         get => _transitions;
     }
 
+    private float startTime = 0;
+    public virtual float runningTime{
+        get => state == NodeState.Runnning ? Time.time - startTime : 0;
+    }
+    public void EnterState(){
+        state = NodeState.Runnning;
+        startTime = Time.time;
+        OnEnter();
+    }
+    public void ExitState(){
+        state = NodeState.Wait;
+        OnExit();
+    }
+    public Transition CheckTransitions(ParameterList list){
+        for(int i = 0; i < transitions.Count; i++){
+            if(transitions[i].CanTransition(list, runningTime)) return transitions[i];
+        }
+        return null;
+    }
+    public virtual void OnEnter(){}
+    public virtual void OnUpdate(){}
+    public virtual void OnExit(){}
+
     public int CompareTo(PCNode other)
     {
-        return actionID - other.actionID;
+        if(actionID > other.actionID) return 1;
+        else if(actionID == other.actionID) return 0;
+        else return -1;
     }
-    public virtual void Init(PlayerControllerAsset asset){
+    public void Init(PlayerControllerAsset asset){
         for(int i = 0; i < transitions.Count; i++){
             transitions[i].Init(asset);
         }
     }
+    public virtual void Init(GameObject obj){}
 }
 }

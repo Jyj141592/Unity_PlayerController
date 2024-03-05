@@ -43,12 +43,16 @@ public class Parameter : IComparable<Parameter>, IComparable<int>
 
     public int CompareTo(Parameter other)
     {
-        return paramID - other.paramID;
+        if(paramID > other.paramID) return 1;
+        else if(paramID == other.paramID) return 0;
+        else return -1;
     }
 
     public int CompareTo(int other)
     {
-        return paramID - other;
+        if(paramID > other) return 1;
+        else if(paramID == other) return 0;
+        else return -1;
     }
     public Parameter Clone(){
         Parameter clone = new Parameter();

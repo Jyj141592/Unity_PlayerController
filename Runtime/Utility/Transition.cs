@@ -19,9 +19,11 @@ public class Transition// : ScriptableObject
         get => _mute;
         set => _mute = value;
     }
-    [field: SerializeField]
-    public int testValue{
-        get; set;
+    [SerializeField]
+    private float _exitTime;
+    public float exitTime{
+        get => _exitTime;
+        private set => _exitTime = value;
     }
     [HideInInspector]
     [SerializeField]
@@ -34,8 +36,9 @@ public class Transition// : ScriptableObject
         dest = null;
         conditions = new List<Condition>();
     }
-    public bool CanTransition(ParameterList list){
-        if(!mute) return false;
+    public bool CanTransition(ParameterList list, float runningTime){
+        if(mute) return false;
+        if(runningTime < exitTime) return false;
         for(int i = 0; i < conditions.Count; i++){
             if(!conditions[i].IsTrue(list)) return false;
         }

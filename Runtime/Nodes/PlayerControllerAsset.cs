@@ -21,7 +21,7 @@ public class PlayerControllerAsset : PCNode
     public AnyState anyState{
         get => _anyState;
     }
-    //[HideInInspector]
+    [HideInInspector]
     [SerializeField]
     private ParameterList _parameterList = null;
     public ParameterList parameterList{
@@ -30,27 +30,33 @@ public class PlayerControllerAsset : PCNode
     private const int indexOfEntry = -1;
     private const int indexOfAnyState = -2;
     private const int noFound = -10;
+
+    public PCNode runningNode{
+        get; private set;
+    } = null;
     public PlayerControllerAsset(){
         _parameterList = new ParameterList();
     }
 
-    public PlayerControllerAsset CloneAsset(){
-        PlayerControllerAsset asset = Instantiate(this);
-        asset._anyState = Instantiate(anyState);
-
-        //asset._parameterList = _parameterList.Clone();
-        asset._parameterList.parameters.Sort();
-
-        for(int i = 0; i < asset._nodes.Count; i++){
-            asset._nodes[i] = Instantiate(asset._nodes[i]);
+    public void Run(){
+        Transition transition = anyState.CheckTransitions(parameterList);
+        if(transition != null){
+            ChangeState(transition);
         }
-        asset._nodes.Sort();
-        asset.Init(asset);
-        asset._anyState.Init(asset);
-        for(int i = 0; i < asset._nodes.Count; i++){
-            asset._nodes[i].Init(asset);
+        else{
+            transition = runningNode.CheckTransitions(parameterList);
+            if(transition != null){
+                ChangeState(transition);
+            }
         }
-        return asset;
+        runningNode.OnUpdate();
+    }
+
+    private void ChangeState(Transition transition){
+        runningNode.ExitState();
+        runningNode = transition.dest;
+        runningNode.EnterState();
+        anyState.ChangeNode(runningNode);
     }
 
     public int FindIndexOfNode(string name){
@@ -88,6 +94,31 @@ public class PlayerControllerAsset : PCNode
         else if(index >= nodes.Count) return null;
         return _nodes[index];
     }
-    
+    public PlayerControllerAsset CloneAsset(){
+        PlayerControllerAsset asset = Instantiate(this);
+        asset._anyState = Instantiate(anyState);
+
+        //asset._parameterList = _parameterList.Clone();
+        asset._parameterList.parameters.Sort();
+
+        for(int i = 0; i < asset._nodes.Count; i++){
+            asset._nodes[i] = Instantiate(asset._nodes[i]);
+        }
+        asset._nodes.Sort();
+        asset.Init(asset);
+        asset._anyState.Init(asset);
+        for(int i = 0; i < asset._nodes.Count; i++){
+            asset._nodes[i].Init(asset);
+        }
+        asset.runningNode = asset;
+        asset.EnterState();
+        asset.anyState.ChangeNode(asset);
+        return asset;
+    }
+    public override void Init(GameObject obj){
+        for(int i = 0; i < nodes.Count; i++){
+            nodes[i].Init(obj);
+        }
+    }
 }
 }

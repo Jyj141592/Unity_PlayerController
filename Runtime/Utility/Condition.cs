@@ -22,6 +22,7 @@ public class Condition
         get => _paramID;
         private set => _paramID = value;
     }
+
     private int paramIndex;
     [SerializeField]
     private TransitionCondition _condition;

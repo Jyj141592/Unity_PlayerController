@@ -7,5 +7,10 @@ namespace PlayerController{
 [DisallowCreateNode]
 public class AnyState : PCNode
 {
+    private PCNode currentNode = null;
+    public override float runningTime => currentNode.runningTime;
+    public void ChangeNode(PCNode node){
+        currentNode = node;
+    }
 }
 }
