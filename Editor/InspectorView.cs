@@ -92,12 +92,12 @@ public class InspectorView : VisualElement
                         if(!foundName && field.Name.Equals("_actionName")){
                             textField.value = (string) field.GetValue(nodeView.node);
                             textField.RegisterValueChangedCallback(callback => {
-                                string newName = nodeView.OnNodeNameChanged(callback.previousValue, callback.newValue);
-                                // if(!newName.Equals(callback.newValue)){
-                                //     textField.value = newName;
-                                // }
-                                textField.SetValueWithoutNotify(newName);
-                                listView.Rebuild();
+                                textField.SetValueWithoutNotify(callback.previousValue);
+                                if(!Application.isPlaying){
+                                    string newName = nodeView.OnNodeNameChanged(callback.previousValue, callback.newValue);
+                                    textField.SetValueWithoutNotify(newName);
+                                    listView.Rebuild();
+                                }
                             });
                             scrollView.Add(textField);
                             foundName = true;

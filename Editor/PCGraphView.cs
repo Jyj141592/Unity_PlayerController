@@ -302,6 +302,7 @@ public class PCGraphView : GraphView
         //     evt.menu.AppendAction("Make Transition",callback => {});
             
         // }
+        if(Application.isPlaying) return;
         Vector2 nodePosition = this.ChangeCoordinatesTo(contentViewContainer, evt.localMousePosition);
         evt.menu.AppendAction("Add Subgraph node", callback => {
             CreateNodeView(typeof(SubGraphNode), nodePosition);

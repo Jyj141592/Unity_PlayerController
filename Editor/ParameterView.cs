@@ -110,13 +110,16 @@ public class ParameterView : VisualElement
         // Initialize toolbar menu
         menu = this.Q<ToolbarMenu>();
         menu.menu.AppendAction("int", (action) => {
-            AddParameter(ParameterType.Int);
+            if(!Application.isPlaying)
+                AddParameter(ParameterType.Int);
         });
         menu.menu.AppendAction("float", (action) => {
-            AddParameter(ParameterType.Float);
+            if(!Application.isPlaying)
+                AddParameter(ParameterType.Float);
         });
         menu.menu.AppendAction("bool", (action) => {
-            AddParameter(ParameterType.Bool);
+            if(!Application.isPlaying)
+                AddParameter(ParameterType.Bool);
         });
 
         LoadParameterView(SearchOption.Name, null);
@@ -125,6 +128,7 @@ public class ParameterView : VisualElement
     public void ChangeAsset(PlayerControllerAsset asset){
         this.asset = asset;
         parameterList = asset.parameterList;
+        listView.reorderable = !Application.isPlaying;
         LoadParameterView(SearchOption.Name, null);
     }
     
