@@ -398,6 +398,7 @@ public class ParameterView : VisualElement
 
     private void OnKeyDown(KeyDownEvent ev){
         if(ev.keyCode == KeyCode.Delete){
+            if(Application.isPlaying) return;
             int selected = listView.selectedIndex;
             if(selected < 0) return;
             List<string> usage = FindParameterUsage(parameterList.parameters[selected].name);

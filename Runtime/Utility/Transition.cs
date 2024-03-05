@@ -34,8 +34,12 @@ public class Transition// : ScriptableObject
         dest = null;
         conditions = new List<Condition>();
     }
-    public bool canTransition(){
-        return false;
+    public bool CanTransition(ParameterList list){
+        if(!mute) return false;
+        for(int i = 0; i < conditions.Count; i++){
+            if(!conditions[i].IsTrue(list)) return false;
+        }
+        return true;
     } 
     public void Init(PlayerControllerAsset asset){
         dest = asset.FindNodeByName(dest.actionName);

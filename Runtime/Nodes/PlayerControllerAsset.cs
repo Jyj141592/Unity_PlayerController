@@ -85,6 +85,7 @@ public class PlayerControllerAsset : PCNode
     public PCNode FindNodeByIndex(int index){
         if(index == indexOfAnyState) return anyState;
         else if(index == indexOfEntry) return this;
+        else if(index >= nodes.Count) return null;
         return _nodes[index];
     }
     

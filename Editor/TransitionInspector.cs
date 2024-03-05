@@ -52,6 +52,10 @@ public class TransitionInspector : VisualElement
             ConditionElement element = e as ConditionElement;
             element.index = i;
             element.dropdown.RegisterValueChangedCallback((callback) => {
+                if(Application.isPlaying){
+                    element.dropdown.SetValueWithoutNotify(callback.previousValue);
+                    return;
+                }
                 int idx = parameterView.ParameterIndex(callback.newValue);
                 ParameterType t = parameterList.parameters[idx].paramType;
                 SerializedObject obj = new SerializedObject(nodeView.node);
@@ -202,6 +206,7 @@ public class TransitionInspector : VisualElement
         listView.Rebuild();
     }
     private void AddCondition(){
+        if(Application.isPlaying) return;
         if(parameterList.parameters.Count <= 0) return;
         if(nodeView == null) return;
         Parameter param = parameterList.parameters[0];
@@ -235,6 +240,7 @@ public class TransitionInspector : VisualElement
 
     private void OnKeyDown(KeyDownEvent ev){
         if(ev.keyCode == KeyCode.Delete){
+            if(Application.isPlaying) return;
             int selected = listView.selectedIndex;
             if(selected < 0) return;
             SerializedObject obj = new SerializedObject(nodeView.node);

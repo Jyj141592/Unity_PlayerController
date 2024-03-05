@@ -37,7 +37,23 @@ public class Condition
     public int GetInt(){
         return (int) value;
     }
-    public bool IsTrue(){
+    public bool IsTrue(ParameterList list){
+        switch(condition){
+            case TransitionCondition.Float_Greater:
+            return list.GetFloat(paramIndex) > value;
+            case TransitionCondition.Float_Less:
+            return list.GetFloat(paramIndex) < value;
+            case TransitionCondition.Int_Greater:
+            return list.GetInt(paramIndex) > value;
+            case TransitionCondition.Int_Equal:
+            return list.GetInt(paramIndex) == (int)value;
+            case TransitionCondition.Int_Less:
+            return list.GetInt(paramIndex) < value;
+            case TransitionCondition.Bool_True:
+            return list.GetBool(paramIndex) == true;
+            case TransitionCondition.Bool_False:
+            return list.GetBool(paramIndex) == false;
+        }
         return false;
     }
     public void Init(PlayerControllerAsset asset){
