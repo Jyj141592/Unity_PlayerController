@@ -40,5 +40,8 @@ public class Condition
     public bool IsTrue(){
         return false;
     }
+    public void Init(PlayerControllerAsset asset){
+        paramIndex = asset.parameterList.FindIndexOfParameter(paramName);
+    }
 }
 }

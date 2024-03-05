@@ -5,7 +5,7 @@ using UnityEditor;
 using UnityEngine;
 
 namespace PlayerController{
-public class PCNode : ScriptableObject
+public class PCNode : ScriptableObject, IComparable<PCNode>
 {
     public enum NodeState{
         Wait, Runnning
@@ -18,6 +18,13 @@ public class PCNode : ScriptableObject
     public string actionName{
         get => _actionName;
         private set => _actionName = value;
+    }
+    [HideInInspector]
+    [SerializeField]
+    private int _actionID;
+    public int actionID{
+        get => _actionID;
+        private set => _actionID = value;
     }
     [HideInInspector]
     [SerializeField]
@@ -35,16 +42,19 @@ public class PCNode : ScriptableObject
     }
     [HideInInspector]
     [SerializeField]
-    private List<Transition> _transitions;
+    private List<Transition> _transitions = new List<Transition>();
     public List<Transition> transitions{
         get => _transitions;
     }
 
-    public void Init(string actionName, Vector2 position){
-        this.actionName = actionName;
-        this.position = position;
-        _transitions = new List<Transition>();
-        guid = GUID.Generate().ToString();
+    public int CompareTo(PCNode other)
+    {
+        return actionID - other.actionID;
+    }
+    public virtual void Init(PlayerControllerAsset asset){
+        for(int i = 0; i < transitions.Count; i++){
+            transitions[i].Init(asset);
+        }
     }
 }
 }

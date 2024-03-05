@@ -53,6 +53,7 @@ public class PCNodeView : Node
 
         nodeTitle = new TextElement();
         nodeTitle.BindProperty(obj.FindProperty("_actionName"));
+
         nodeTitle.style.height = 20;
         nodeTitle.style.alignSelf = Align.Center;
         nodeTitle.style.fontSize = 15;
@@ -86,8 +87,6 @@ public class PCNodeView : Node
         obj.FindProperty("_position").vector2Value = newPos.position;
         obj.ApplyModifiedProperties();
         //node.position = newPos.position;
-        if(!Application.isPlaying)
-            AssetDatabase.SaveAssets();
     }
 
     public void MoveTransitionIndex(int from, int to){
@@ -154,6 +153,7 @@ public class PCNodeView : Node
         string newName = onNodeNameChanged.Invoke(oldVal, newVal);
         //nodeTitle.text = newName;
         obj.FindProperty("_actionName").stringValue = newName;
+        obj.FindProperty("_actionID").intValue = Animator.StringToHash(newName);
         obj.ApplyModifiedProperties();
         //node.actionName = newName;
 
@@ -172,10 +172,10 @@ public class PCNodeView : Node
 
     public void OnStateUpdate(){
         if(node.state == PCNode.NodeState.Runnning){
-            this.style.color = Color.yellow;
+            mainContainer.style.backgroundColor = Color.yellow;
         }
         else{
-            this.style.color = defaultColor;
+            mainContainer.style.backgroundColor = defaultColor;
         }
     }
 #endregion Callbacks

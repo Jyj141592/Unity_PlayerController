@@ -30,19 +30,18 @@ public class Transition// : ScriptableObject
         get => _conditions;
         private set => _conditions = value;
     }
-    public Transition(PCNode node){
-        dest = node;
-        conditions = new List<Condition>();
-    }
     public Transition(){
         dest = null;
         conditions = new List<Condition>();
     }
-    public void Init(PCNode dest){
-        this.dest = dest;
-    }
     public bool canTransition(){
         return false;
+    } 
+    public void Init(PlayerControllerAsset asset){
+        dest = asset.FindNodeByName(dest.actionName);
+        for(int i = 0; i < conditions.Count; i++){
+            conditions[i].Init(asset);
+        }
     }
 }
 }

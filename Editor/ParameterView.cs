@@ -2,8 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Codice.CM.Client.Differences;
-using Unity.Mathematics;
 using UnityEditor;
 using UnityEditor.Rendering;
 using UnityEditor.UIElements;
@@ -67,62 +65,7 @@ public class ParameterView : VisualElement
             return container;
         };
         listView.bindItem = (e, j) => {
-            int i = names[(listView.itemsSource[j] as Parameter).name];
-            Label label = e.Q<Label>();
-            //label.text = parameterList.parameters[i].GetName();
-            SerializedObject obj = new SerializedObject(asset);
-            SerializedProperty property = obj.FindProperty("_parameterList").FindPropertyRelative("_parameters").GetArrayElementAtIndex(i);
-            label.BindProperty(property.FindPropertyRelative("_name"));
-
-            Toggle toggle = e.Q<Toggle>();
-            if(toggle != null) e.Remove(toggle);
-            IntegerField intField = e.Q<IntegerField>();
-            if(intField != null) e.Remove(intField);
-            FloatField floatField = e.Q<FloatField>();
-            if(floatField != null) e.Remove(floatField);
-
-            if(parameterList.parameters[i].paramType == ParameterType.Bool){
-                toggle = new Toggle();
-                toggle.SetValueWithoutNotify(parameterList.parameters[i].GetBool());
-                toggle.RegisterValueChangedCallback((callback) => {
-                    float val = callback.newValue ? 1 : 0;
-                    SerializedObject obj = new SerializedObject(asset);
-                    SerializedProperty property = obj.FindProperty("_parameterList").FindPropertyRelative("_parameters").GetArrayElementAtIndex(i);
-                    property.FindPropertyRelative("value").floatValue = val;
-                    obj.ApplyModifiedProperties();
-                });
-                e.Add(toggle);
-            }
-            else if(parameterList.parameters[i].paramType == ParameterType.Int){
-                intField = new IntegerField();
-                intField.isDelayed = true;
-                intField.SetValueWithoutNotify(parameterList.parameters[i].GetInt());
-                intField.RegisterValueChangedCallback((callback) => {
-                    float val = callback.newValue;
-                    SerializedObject obj = new SerializedObject(asset);
-                    SerializedProperty property = obj.FindProperty("_parameterList").FindPropertyRelative("_parameters").GetArrayElementAtIndex(i);
-                    property.FindPropertyRelative("value").floatValue = val;
-                    obj.ApplyModifiedProperties();
-                });
-                intField.style.minWidth = 35;
-                intField.style.maxWidth = 45;
-                e.Add(intField);
-            }
-            else if(parameterList.parameters[i].paramType == ParameterType.Float){
-                floatField = new FloatField();
-                floatField.isDelayed = true;
-                floatField.SetValueWithoutNotify(parameterList.parameters[i].GetFloat());
-                floatField.RegisterValueChangedCallback((callback) => {
-                    SerializedObject obj = new SerializedObject(asset);
-                    SerializedProperty property = obj.FindProperty("_parameterList").FindPropertyRelative("_parameters").GetArrayElementAtIndex(i);
-
-                    property.FindPropertyRelative("value").floatValue = callback.newValue;
-                    obj.ApplyModifiedProperties();
-                });
-                floatField.style.minWidth = 35;
-                floatField.style.maxWidth = 45;
-                e.Add(floatField);
-            }       
+            BindItem(e, j);
         };     
                 
         // Initialize toolbar searchfield
@@ -178,11 +121,19 @@ public class ParameterView : VisualElement
 
         LoadParameterView(SearchOption.Name, null);
     }
+
+    public void ChangeAsset(PlayerControllerAsset asset){
+        this.asset = asset;
+        parameterList = asset.parameterList;
+        LoadParameterView(SearchOption.Name, null);
+    }
     
     private void LoadParameterView(SearchOption searchOption, string searchName){
         clickedIndex = -1;
         clickedTime = 0;
         listView.Clear();
+        listView.itemsSource = null;
+        listView.Rebuild();
         names.Clear();
         int i = 0;
         foreach(var p in parameterList.parameters){
@@ -203,6 +154,70 @@ public class ParameterView : VisualElement
             SearchInt(searchName);
             break;
         }
+    }
+    public void BindItem(VisualElement e, int j){
+            int i = names[(listView.itemsSource[j] as Parameter).name];
+            Label label = e.Q<Label>();
+            //label.text = parameterList.parameters[i].GetName();
+            SerializedObject obj = new SerializedObject(asset);
+            SerializedProperty property = obj.FindProperty("_parameterList").FindPropertyRelative("_parameters").GetArrayElementAtIndex(i);
+            label.BindProperty(property.FindPropertyRelative("_name"));
+
+            Toggle toggle = e.Q<Toggle>();
+            if(toggle != null) e.Remove(toggle);
+            IntegerField intField = e.Q<IntegerField>();
+            if(intField != null) e.Remove(intField);
+            FloatField floatField = e.Q<FloatField>();
+            if(floatField != null) e.Remove(floatField);
+
+            floatField = new FloatField();
+            floatField.BindProperty(property.FindPropertyRelative("value"));           
+
+            if(parameterList.parameters[i].paramType == ParameterType.Bool){
+                toggle = new Toggle();
+                toggle.SetValueWithoutNotify(parameterList.parameters[i].GetBool());
+                toggle.RegisterValueChangedCallback((callback) => {
+                    float val = callback.newValue ? 1 : 0;
+                    floatField.value = val;
+                });
+                floatField.RegisterValueChangedCallback((callback) => {
+                    toggle.SetValueWithoutNotify(callback.newValue > 0);
+                });
+                toggle.style.flexDirection = FlexDirection.Column;
+                floatField.style.maxWidth = 0;
+                floatField.style.maxHeight = 0;
+                floatField.visible = false;
+
+                toggle.Add(floatField);
+                e.Add(toggle);
+            }
+            else if(parameterList.parameters[i].paramType == ParameterType.Int){
+                intField = new IntegerField();
+                intField.isDelayed = true;
+                intField.SetValueWithoutNotify(parameterList.parameters[i].GetInt());
+                intField.RegisterValueChangedCallback((callback) => {
+                    float val = callback.newValue;
+                    floatField.value = val;
+                });
+                intField.style.flexDirection = FlexDirection.Column;
+                intField.style.minWidth = 35;
+                //intField.style.maxWidth = 45;
+                
+                floatField.RegisterValueChangedCallback((callback) => {
+                    intField.SetValueWithoutNotify((int) callback.newValue);
+                });
+                floatField.style.maxWidth = 0;
+                floatField.style.maxHeight = 0;
+                floatField.visible = false;
+
+                intField.Add(floatField);
+                e.Add(intField);
+            }
+            else if(parameterList.parameters[i].paramType == ParameterType.Float){
+                floatField.isDelayed = true;
+                floatField.style.minWidth = 35;
+                e.Add(floatField);
+            }
     }
 #endregion Initialize
 

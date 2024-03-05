@@ -129,17 +129,17 @@ public class InspectorView : VisualElement
         SetListView();
     }
     private void SetField<T>(BaseField<T> field, FieldInfo fieldInfo, SerializedObject obj){
-        if(!Application.isPlaying){
+        //if(!Application.isPlaying){
             field.BindProperty(obj.FindProperty(fieldInfo.Name));
-        }
-        else{
-            field.RegisterValueChangedCallback(callback => {
-                fieldInfo.SetValue(focused.node, callback.newValue);
-            });
-        }
+        //}
+        // else{
+        //     field.RegisterValueChangedCallback(callback => {
+        //         fieldInfo.SetValue(focused.node, callback.newValue);
+        //     });
+        // }
         scrollView.Add(field);
     }
-    private void ClearInspector(){
+    public void ClearInspector(){
         listView.itemsSource = null;
         listView.Rebuild();
         listView.ClearSelection();

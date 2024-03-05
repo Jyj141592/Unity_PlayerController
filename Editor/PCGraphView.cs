@@ -58,6 +58,15 @@ public class PCGraphView : GraphView
     public void OnDestroy() {
         Undo.undoRedoPerformed -= UndoRedoPerformed;
     }
+
+    public void InitNode(PCNode node, string name, Vector2 position){
+        SerializedObject obj = new SerializedObject(node);
+        obj.FindProperty("_actionName").stringValue = name;
+        obj.FindProperty("_actionID").intValue = Animator.StringToHash(name);
+        obj.FindProperty("_position").vector2Value = position;
+        obj.FindProperty("_guid").stringValue = GUID.Generate().ToString();
+        obj.ApplyModifiedProperties();
+    }
 #endregion Initialize
 
 #region Load
@@ -65,7 +74,7 @@ public class PCGraphView : GraphView
         ClearGraph();
         entryNode = node;
         if(entryNode.anyState == null){
-            entryNode.Init("Entry", Vector2.zero);
+            InitNode(entryNode, "Entry", Vector2.zero);
             CreateAnyStateNode(entryNode);
         }
         rootNode = LoadNodeView(node);
@@ -121,7 +130,7 @@ public class PCGraphView : GraphView
 #region Create Elements
     private void CreateAnyStateNode(PlayerControllerAsset asset){
         AnyState anyState = ScriptableObject.CreateInstance<AnyState>();
-        anyState.Init("Any State", new Vector2(0, -100));
+        InitNode(anyState, "Any State", new Vector2(0, -100));
         SerializedObject obj = new SerializedObject(asset);
         //if(!Application.isPlaying){
             AssetDatabase.AddObjectToAsset(anyState, asset);
@@ -133,7 +142,7 @@ public class PCGraphView : GraphView
     // Modifing Asset
     private PCNodeView CreateNodeView(System.Type type, Vector2 position){
         var node = (PCNode) ScriptableObject.CreateInstance(type);
-        node.Init(GetUniqueName(PCEditorUtility.NamespaceToClassName(node.GetType().ToString())), position);
+        InitNode(node, GetUniqueName(PCEditorUtility.NamespaceToClassName(node.GetType().ToString())), position);
 
         Undo.RecordObject(entryNode, "Create Node");
 

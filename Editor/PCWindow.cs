@@ -118,6 +118,9 @@ public class PCWindow : EditorWindow
                 PlayerController controller = Selection.activeGameObject.GetComponent<PlayerController>();
                 if(controller != null && controller.playerControllerAsset.guid.Equals(asset.guid)) {
                     graphView?.LoadGraph(controller.playerControllerAsset);
+                    nodeInspector?.ClearInspector();
+                    parameterView?.ChangeAsset(controller.playerControllerAsset);
+                    edgeInspector?.ChangeParameterView(parameterView);
                     isPlaying = true;
                 }
             }
@@ -152,8 +155,11 @@ public class PCWindow : EditorWindow
             case PlayModeStateChange.EnteredEditMode:
             isPlaying = false;
             var asset = AssetDatabase.LoadAssetAtPath<PlayerControllerAsset>(path);
-            if(asset != null && graphView != null){
-                graphView.LoadGraph(asset);
+            if(asset != null){
+                graphView?.LoadGraph(asset);
+                nodeInspector?.ClearInspector();
+                parameterView?.ChangeAsset(asset);
+                edgeInspector?.ChangeParameterView(parameterView);
             }
             break;
             // case PlayModeStateChange.EnteredPlayMode:

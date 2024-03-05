@@ -100,6 +100,14 @@ public class TransitionInspector : VisualElement
         ClearInspector();
     }
 
+    public void ChangeParameterView(ParameterView view){
+        parameterView = view;
+        parameterList = view.parameterList;
+        parameterView.onAddOrDeleted -= OnParameterChanged;
+        parameterView.onAddOrDeleted += OnParameterChanged;
+        ClearInspector();
+    }
+
     public void UpdateInspector(PCEdgeView edge){
         ClearInspector();
         transitionName.text = edge.ToString();
@@ -165,14 +173,14 @@ public class TransitionInspector : VisualElement
 
     private void SetField<T>(BaseField<T> field, FieldInfo fieldInfo, SerializedObject obj){
         SerializedProperty property = obj.FindProperty("_transitions").GetArrayElementAtIndex(edge.transitionIndex);
-        if(!Application.isPlaying){
+        //if(!Application.isPlaying){
             field.BindProperty(property.FindPropertyRelative(fieldInfo.Name));
-        }
-        else{
-            field.RegisterValueChangedCallback(callback => {
-                fieldInfo.SetValue(edge.transition, callback.newValue);
-            });
-        }
+        //}
+        // else{
+        //     field.RegisterValueChangedCallback(callback => {
+        //         fieldInfo.SetValue(edge.transition, callback.newValue);
+        //     });
+        // }
         foldout.Add(field);
     }
 

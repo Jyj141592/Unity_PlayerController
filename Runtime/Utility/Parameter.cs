@@ -50,5 +50,13 @@ public class Parameter : IComparable<Parameter>, IComparable<int>
     {
         return paramID - other;
     }
+    public Parameter Clone(){
+        Parameter clone = new Parameter();
+        clone._name = _name;
+        clone._paramID = _paramID;
+        clone._paramType = _paramType;
+        clone.value = value;
+        return clone;
+    }
 }
 }
