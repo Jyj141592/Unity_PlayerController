@@ -45,7 +45,6 @@ public class InspectorView : VisualElement
         ClearInspector();
         focused = nodeView;
         nodeView.onDeleted += OnNodeDeleted;
-        nodeView.onUpdated += OnNodeUpdated;
         bool foundName = false;
         SerializedObject obj = new SerializedObject(nodeView.node);
         if(nodeView.node is not PlayerControllerAsset && nodeView.node is not AnyState){
@@ -146,7 +145,6 @@ public class InspectorView : VisualElement
         scrollView.Clear();
         if(focused != null){
             focused.onDeleted -= OnNodeDeleted;
-            focused.onUpdated -= OnNodeUpdated;
             focused = null;
         }
         selected = null;
@@ -179,9 +177,6 @@ public class InspectorView : VisualElement
             }
         }
     }
-    private void OnNodeUpdated(){
-        SetListView();
-    }
     private void OnNodeDeleted(){
         ClearInspector();
     }
@@ -205,6 +200,13 @@ public class InspectorView : VisualElement
 
     private void RemoveSelection(PCEdgeView edge){
         graphView.RemoveFromSelection(edge);
+    }
+
+    public void Update(){
+        if(focused != null && focused.updated){
+            focused.updated = false;
+            SetListView();
+        }
     }
 }
 }

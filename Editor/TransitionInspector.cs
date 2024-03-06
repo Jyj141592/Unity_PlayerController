@@ -47,7 +47,15 @@ public class TransitionInspector : VisualElement
             return element;
         };
         listView.bindItem = (e, i) => {
-            string name = edge.transition.conditions[i].paramName;
+            BindItem(e, i);
+        };
+
+        button.clicked -= AddCondition;
+        button.clicked += AddCondition;
+    }
+
+    private void BindItem(VisualElement e, int i){
+        string name = edge.transition.conditions[i].paramName;
             int index = parameterView.ParameterIndex(name);
             ConditionElement element = e as ConditionElement;
             element.index = i;
@@ -94,10 +102,6 @@ public class TransitionInspector : VisualElement
                     break;
                 }
             }
-        };
-
-        button.clicked -= AddCondition;
-        button.clicked += AddCondition;
     }
 
     private void OnUndoRedoPerformed(){
@@ -116,7 +120,6 @@ public class TransitionInspector : VisualElement
         ClearInspector();
         transitionName.text = edge.ToString();
         edge.onDeleted += OnEdgeDeleted;
-        edge.onUpdated += OnEdgeUpdated;
         this.edge = edge;
         nodeView = edge.output.node as PCNodeView;
         SerializedObject obj = new SerializedObject(nodeView.node);
@@ -192,7 +195,6 @@ public class TransitionInspector : VisualElement
         transitionName.text = null;
         if(edge != null){
             edge.onDeleted -= OnEdgeDeleted;
-            edge.onUpdated -= OnEdgeUpdated;
             edge = null;
         }
         foldout.Clear();
@@ -201,6 +203,7 @@ public class TransitionInspector : VisualElement
         listView.Rebuild();
     }
     public void LoadListView(){
+        listView.itemsSource = null;
         listView.Clear();
         listView.itemsSource = edge?.transition.conditions.ToList();
         listView.Rebuild();
@@ -250,9 +253,6 @@ public class TransitionInspector : VisualElement
             LoadListView();
         }
     }
-    private void OnEdgeUpdated(){
-        UpdateInspector(edge);
-    }
     private void OnEdgeDeleted(){
         ClearInspector();
     }
@@ -286,7 +286,9 @@ public class TransitionInspector : VisualElement
             d.style.flexGrow = 1;
             d.choices.Add("true");
             d.choices.Add("false");
+            SerializedObject obj = new SerializedObject(node);
             TransitionCondition c = node.transitions[edgeIdx].conditions[index].condition;
+            //TransitionCondition c = obj.FindProperty("_transitions").GetArrayElementAtIndex(edgeIdx).FindPropertyRelative("_conditions").GetArrayElementAtIndex(index).FindPropertyRelative("_condition").GetEnumValue<TransitionCondition>();
             if(c == TransitionCondition.Bool_False){
                 d.SetValueWithoutNotify("false");
             }
@@ -294,7 +296,7 @@ public class TransitionInspector : VisualElement
                 d.SetValueWithoutNotify("true");
             }
             else{
-                SerializedObject obj = new SerializedObject(node);
+                //SerializedObject obj = new SerializedObject(node);
                 SerializedProperty p = obj.FindProperty("_transitions").GetArrayElementAtIndex(edgeIdx).FindPropertyRelative("_conditions").GetArrayElementAtIndex(index);
                 p.FindPropertyRelative("_condition").SetEnumValue(TransitionCondition.Bool_True);
                 p.FindPropertyRelative("value").floatValue = 0;
@@ -411,6 +413,12 @@ public class TransitionInspector : VisualElement
                 obj.ApplyModifiedProperties();
             });
             control.Add(i);
+        }
+    }
+    public void Update(){
+        if(edge != null && edge.updated){
+            edge.updated = false;
+            UpdateInspector(edge);
         }
     }
 }

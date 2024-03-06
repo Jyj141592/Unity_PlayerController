@@ -40,7 +40,7 @@ public abstract class PCNode : ScriptableObject, IComparable<PCNode>
         get => _guid;
         private set => _guid = value;
     }
-    [HideInInspector]
+    //[HideInInspector]
     [SerializeField]
     private List<Transition> _transitions = new List<Transition>();
     public List<Transition> transitions{

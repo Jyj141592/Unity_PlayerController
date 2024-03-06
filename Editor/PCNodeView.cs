@@ -19,7 +19,8 @@ public class PCNodeView : Node
     public Port outputPort = null;
     private Color defaultColor = new Color(80f / 255f, 80f / 255f, 80f / 255f);
     public Action<PCNodeView> onNodeSelected;
-    public Action onUpdated;
+    //public Action onUpdated;
+    public bool updated = false;
     public Action onDeleted;
     private SerializedObject obj;
     private Func<string, string, string> onNodeNameChanged;
@@ -101,12 +102,10 @@ public class PCNodeView : Node
         if(to > from){
             for(int i = 0; i < from; i++){
                 edgeView = list[i] as PCEdgeView;
-                edgeView.transitionIndex = i;
                 outputPort.Connect(edgeView);
             }
             for(int i = from; i < to; i++){
                 edgeView = list[i + 1] as PCEdgeView;
-                edgeView.transitionIndex = i;
                 outputPort.Connect(edgeView);
                 property.MoveArrayElement(i, i + 1);
                 edgeView.transition = node.transitions[i];
@@ -115,21 +114,18 @@ public class PCNodeView : Node
             edge.transition = node.transitions[to];
             for(int i = to + 1; i < list.Count(); i++){
                 edgeView = list[i] as PCEdgeView;
-                edgeView.transitionIndex = i;
                 outputPort.Connect(edgeView);
             }
         }
         else{
             for(int i = 0; i < to; i++){
                 edgeView = list[i] as PCEdgeView;
-                edgeView.transitionIndex = i;
                 outputPort.Connect(edgeView);
             }
             outputPort.Connect(edge);
             edge.transition = node.transitions[to];
             for(int i = to + 1; i <= from; i++){
                 edgeView = list[i - 1] as PCEdgeView;
-                edgeView.transitionIndex = i;
                 outputPort.Connect(edgeView);
                 edgeView.transition = node.transitions[i];
             }
@@ -138,13 +134,18 @@ public class PCNodeView : Node
             }
             for(int i = from + 1; i < list.Count(); i++){
                 edgeView = list[i] as PCEdgeView;
-                edgeView.transitionIndex = i;
                 outputPort.Connect(edgeView);
             }
         }
         obj.ApplyModifiedProperties();
         if(!Application.isPlaying)
             AssetDatabase.SaveAssets();
+        int j = 0;
+        for(j = 0; j < outputPort.connections.Count(); j++){
+            PCEdgeView view = outputPort.connections.ElementAt(j) as PCEdgeView;
+            view.transition = node.transitions[j];
+            view.transitionIndex = j;
+        }
     }
     
     public string OnNodeNameChanged(string oldVal, string newVal){
@@ -163,11 +164,12 @@ public class PCNodeView : Node
         return newName;
     }
     public void OnDeleteEdge(int index){
-        for(int i = index; i < outputPort.connections.Count(); i++){
+        for(int i = 0; i < outputPort.connections.Count(); i++){
             PCEdgeView edge = outputPort.connections.ElementAt(i) as PCEdgeView;
+            edge.transition = node.transitions[i];
             edge.transitionIndex = i;
         }
-        onUpdated?.Invoke();
+        updated = true;
     }
 
     public void OnStateUpdate(){

@@ -267,7 +267,7 @@ public class PCGraphView : GraphView
                 input.inputPort.Connect(edge);
                 output.outputPort.Connect(edge);
                 changes.edgesToCreate[i] = edge;
-                output.onUpdated?.Invoke();
+                output.updated = true;
             }
         }
         if(changes.elementsToRemove != null){

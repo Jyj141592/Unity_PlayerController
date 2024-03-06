@@ -25,7 +25,6 @@ public class Transition// : ScriptableObject
         get => _exitTime;
         private set => _exitTime = value;
     }
-    [HideInInspector]
     [SerializeField]
     private List<Condition> _conditions;
     public List<Condition> conditions{
