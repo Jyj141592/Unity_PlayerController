@@ -1,11 +1,8 @@
-using Packages.Rider.Editor.ProjectGeneration;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEngine;
 using UnityEngine.UIElements;
-using UnityEditor.Experimental.GraphView;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 
 
 namespace PlayerController.Editor{
@@ -142,8 +139,8 @@ public class PCWindow : EditorWindow
         if(isPlaying){
             graphView?.UpdateState();
         }
-        nodeInspector.Update();
-        edgeInspector.Update();
+        nodeInspector?.Update();
+        edgeInspector?.Update();
     }
     
     public void OnPlayModeStateChanged(PlayModeStateChange chg){

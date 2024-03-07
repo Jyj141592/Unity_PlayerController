@@ -7,8 +7,6 @@ using UnityEngine;
 using UnityEditor.UIElements;
 using System.Linq;
 using System;
-using UnityEditor.Experimental.GraphView;
-using Unity.VisualScripting;
 
 namespace PlayerController.Editor{
 public class InspectorView : VisualElement

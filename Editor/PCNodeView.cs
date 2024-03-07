@@ -7,8 +7,6 @@ using UnityEditor.UIElements;
 using System;
 using UnityEditor;
 using System.Linq;
-using UnityEditor.Rendering;
-using UnityEngine.UI;
 
 namespace PlayerController.Editor{
 public class PCNodeView : Node
