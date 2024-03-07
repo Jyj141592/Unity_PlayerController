@@ -97,8 +97,12 @@ public class PlayerControllerAsset : PCNode
 
     public bool SetTransitionMute(string nodeName, int transitionIndex, bool value){
         PCNode node = FindNodeByName(nodeName);
-        if(node == null) return false;
-        if(node.transitions.Count >= transitionIndex) return false;
+        if(node == null) {
+            return false;
+        }
+        if(node.transitions.Count <= transitionIndex) {
+            return false;
+        }
         node.transitions[transitionIndex].mute = value;
         return true;
     }
