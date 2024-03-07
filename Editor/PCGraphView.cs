@@ -232,6 +232,7 @@ public class PCGraphView : GraphView
         property.DeleteArrayElementAtIndex(pos);
         obj.ApplyModifiedProperties();
         edge.output.Disconnect(edge);
+        edge.input.Disconnect(edge);
         nodeView.OnDeleteEdge(edge.transitionIndex);
         edge.onDeleted?.Invoke();
         if(!Application.isPlaying){
@@ -241,16 +242,24 @@ public class PCGraphView : GraphView
     }
     private void DisconnectAll(PCNodeView nodeView, List<GraphElement> deleteElements){
         if(nodeView.inputPort != null && nodeView.inputPort.connected){
-            foreach(Edge edge in nodeView.inputPort.connections){
-                DeleteEdge(edge as PCEdgeView);
+            // foreach(Edge edge in nodeView.inputPort.connections){
+            //     DeleteEdge(edge as PCEdgeView);
+            // }
+            while(nodeView.inputPort.connections.Count() > 0){
+                PCEdgeView e = nodeView.inputPort.connections.First() as PCEdgeView;
+                DeleteEdge(e);
+                deleteElements.Add(e);
             }
-            deleteElements.AddRange(nodeView.inputPort.connections);
         }
         if(nodeView.outputPort != null && nodeView.outputPort.connected){
-            foreach(Edge edge in nodeView.outputPort.connections){
-                DeleteEdge(edge as PCEdgeView);
+            // foreach(Edge edge in nodeView.outputPort.connections){
+            //     DeleteEdge(edge as PCEdgeView);
+            // }
+            while(nodeView.outputPort.connections.Count() > 0){
+                PCEdgeView e = nodeView.outputPort.connections.First() as PCEdgeView;
+                DeleteEdge(e);
+                deleteElements.Add(e);
             }
-            deleteElements.AddRange(nodeView.outputPort.connections);
         }
     }
 #endregion Delete Elements
