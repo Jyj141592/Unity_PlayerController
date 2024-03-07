@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine.UIElements;
+using UnityEditor.UIElements;
 using System;
 using UnityEditor;
 using System.Linq;
 using UnityEditor.Rendering;
+using UnityEngine.UI;
 
 namespace PlayerController.Editor{
 public class PCNodeView : Node
@@ -17,8 +19,10 @@ public class PCNodeView : Node
     public Port outputPort = null;
     private Color defaultColor = new Color(80f / 255f, 80f / 255f, 80f / 255f);
     public Action<PCNodeView> onNodeSelected;
-    public bool updated = true;
-    public bool deleted = false;
+    //public Action onUpdated;
+    public bool updated = false;
+    public Action onDeleted;
+    private SerializedObject obj;
     private Func<string, string, string> onNodeNameChanged;
 
 #region Initialize
@@ -26,6 +30,7 @@ public class PCNodeView : Node
         this.node = node;
         onNodeSelected = action;
         this.onNodeNameChanged = onNodeNameChanged;
+        obj = new SerializedObject(node);
     }
     public void Draw(string titleText){
         mainContainer.Remove(titleContainer);
@@ -36,7 +41,7 @@ public class PCNodeView : Node
         mainContainer.style.maxWidth = 300;
 
         // Create input port
-        if(node is not PlayerControllerAsset){
+        if(node is not PlayerControllerAsset && node is not AnyState){
             inputPort = CreatePort(Orientation.Vertical, Direction.Input, Port.Capacity.Multi);
             inputPort.style.marginLeft = 8;
             mainContainer.Insert(0, inputPort);
@@ -47,7 +52,9 @@ public class PCNodeView : Node
             mainContainer.Insert(0, element);
         }
 
-        nodeTitle = new TextElement(){text = titleText};
+        nodeTitle = new TextElement();
+        nodeTitle.BindProperty(obj.FindProperty("_actionName"));
+
         nodeTitle.style.height = 20;
         nodeTitle.style.alignSelf = Align.Center;
         nodeTitle.style.fontSize = 15;
@@ -78,62 +85,100 @@ public class PCNodeView : Node
         base.SetPosition(newPos);
         // Undo
         Undo.RecordObject(node, "Set Position");
-        node.position = newPos.position;
-        if(!Application.isPlaying)
-            AssetDatabase.SaveAssets();
+        obj.FindProperty("_position").vector2Value = newPos.position;
+        obj.ApplyModifiedProperties();
+        //node.position = newPos.position;
     }
 
     public void MoveTransitionIndex(int from, int to){
         Undo.RecordObject(node, "Change Transition Order");
         SerializedObject obj = new SerializedObject(node);
-        SerializedProperty property = obj.FindProperty("transition");
+        SerializedProperty property = obj.FindProperty("_transitions");
         var list = outputPort.connections.ToList();
-        Edge edge = list[from];
-        Transition transition = node.transition[from];
+        PCEdgeView edge = list[from] as PCEdgeView;
+        edge.transitionIndex = to;
+        PCEdgeView edgeView;
         outputPort.DisconnectAll();
         if(to > from){
             for(int i = 0; i < from; i++){
-                outputPort.Connect(list[i]);
+                edgeView = list[i] as PCEdgeView;
+                outputPort.Connect(edgeView);
             }
             for(int i = from; i < to; i++){
-                outputPort.Connect(list[i + 1]);
+                edgeView = list[i + 1] as PCEdgeView;
+                outputPort.Connect(edgeView);
                 property.MoveArrayElement(i, i + 1);
+                edgeView.transition = node.transitions[i];
             }
             outputPort.Connect(edge);
+            edge.transition = node.transitions[to];
             for(int i = to + 1; i < list.Count(); i++){
-                outputPort.Connect(list[i]);
+                edgeView = list[i] as PCEdgeView;
+                outputPort.Connect(edgeView);
             }
         }
         else{
             for(int i = 0; i < to; i++){
-                outputPort.Connect(list[i]);
+                edgeView = list[i] as PCEdgeView;
+                outputPort.Connect(edgeView);
             }
             outputPort.Connect(edge);
+            edge.transition = node.transitions[to];
             for(int i = to + 1; i <= from; i++){
-                outputPort.Connect(list[i - 1]);
+                edgeView = list[i - 1] as PCEdgeView;
+                outputPort.Connect(edgeView);
+                edgeView.transition = node.transitions[i];
             }
             for(int i = from; i > to; i--){
                 property.MoveArrayElement(i, i - 1);
             }
             for(int i = from + 1; i < list.Count(); i++){
-                outputPort.Connect(list[i]);
+                edgeView = list[i] as PCEdgeView;
+                outputPort.Connect(edgeView);
             }
         }
         obj.ApplyModifiedProperties();
-        AssetDatabase.SaveAssets();
+        if(!Application.isPlaying)
+            AssetDatabase.SaveAssets();
+        int j = 0;
+        for(j = 0; j < outputPort.connections.Count(); j++){
+            PCEdgeView view = outputPort.connections.ElementAt(j) as PCEdgeView;
+            view.transition = node.transitions[j];
+            view.transitionIndex = j;
+        }
     }
     
     public string OnNodeNameChanged(string oldVal, string newVal){
         if(nodeTitle.text.Equals(newVal)) return newVal;
         Undo.RecordObject(node, "Rename Node");
         string newName = onNodeNameChanged.Invoke(oldVal, newVal);
-        nodeTitle.text = newName;
-        node.actionName = newName;
+        //nodeTitle.text = newName;
+        obj.FindProperty("_actionName").stringValue = newName;
+        obj.FindProperty("_actionID").intValue = Animator.StringToHash(newName);
+        obj.ApplyModifiedProperties();
+        //node.actionName = newName;
 
         if(!Application.isPlaying){
             AssetDatabase.SaveAssets();
         }
         return newName;
+    }
+    public void OnDeleteEdge(int index){
+        for(int i = 0; i < outputPort.connections.Count(); i++){
+            PCEdgeView edge = outputPort.connections.ElementAt(i) as PCEdgeView;
+            edge.transition = node.transitions[i];
+            edge.transitionIndex = i;
+        }
+        updated = true;
+    }
+
+    public void OnStateUpdate(){
+        if(node.state == PCNode.NodeState.Runnning){
+            mainContainer.style.backgroundColor = Color.yellow;
+        }
+        else{
+            mainContainer.style.backgroundColor = defaultColor;
+        }
     }
 #endregion Callbacks
 }

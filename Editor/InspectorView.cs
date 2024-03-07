@@ -29,83 +29,98 @@ public class InspectorView : VisualElement
         listView.RegisterCallback<KeyDownEvent>(OnKeyDown, TrickleDown.TrickleDown);
         listView.itemIndexChanged += OnItemIndexChanged;
         listView.selectionChanged += OnSelectionChanged;
-        Undo.undoRedoPerformed += ()=> {
-            focused = null;
-            selected = null;
-            this.scrollView.Clear();
-            this.listView.itemsSource = null;
-            this.listView.Rebuild();
-        };
+        Undo.undoRedoPerformed += UndoRedoPerformed;
         
+    }
+
+    private void UndoRedoPerformed(){
+        focused = null;
+        selected = null;
+        this.scrollView.Clear();
+        this.listView.itemsSource = null;
+        this.listView.Rebuild();
     }
     
     public void UpdateInspector(PCNodeView nodeView) {
-        scrollView.Clear();
-        listView.Clear();
-        selected = null;
+        ClearInspector();
         focused = nodeView;
+        nodeView.onDeleted += OnNodeDeleted;
         bool foundName = false;
         SerializedObject obj = new SerializedObject(nodeView.node);
-        if(nodeView.node is not PlayerControllerAsset){
-            var fields = nodeView.node.GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).ToList();
-            fields.Reverse();
-            foreach(var field in fields){
-                if(!field.IsPublic && field.GetCustomAttribute<SerializeField>(true) == null) continue;
-                if(field.GetCustomAttribute<HideInInspector>(true) != null) continue;
-                if(field.FieldType == typeof(int)){
-                    IntegerField intField = new IntegerField(){
-                        label = field.Name
-                    };
-                    SetField(intField, field, obj);
-                }
-                else if(field.FieldType == typeof(float)){
-                    FloatField floatField = new FloatField(){
-                        label = field.Name
-                    };
-                    SetField(floatField, field, obj);
-                }
-                else if(field.FieldType == typeof(bool)){
-                    Toggle toggle = new Toggle(){
-                        label = field.Name
-                    };
-                    SetField(toggle, field, obj);
-                }
-                else if(field.FieldType == typeof(string)){
-                    TextField textField = new TextField(){
-                        label = field.Name
-                    };
-                    textField.isDelayed = true;
-                    if(!foundName && field.Name.Equals("actionName")){
-                        textField.value = (string) field.GetValue(nodeView.node);
-                        textField.RegisterValueChangedCallback(callback => {
-                            string newName = nodeView.OnNodeNameChanged(callback.previousValue, callback.newValue);
-                            if(!newName.Equals(callback.newValue)){
-                                textField.value = newName;
-                            }
-                            listView.Rebuild();
-                        });
-                        scrollView.Add(textField);
-                        foundName = true;
+        if(nodeView.node is not PlayerControllerAsset && nodeView.node is not AnyState){
+            Stack<Type> stack = new Stack<Type>();
+            Type type = nodeView.node.GetType();
+            while(type != null){
+                stack.Push(type);
+                type = type.BaseType;
+            }
+            while(stack.Count > 0){
+                //var members = nodeView.node.GetType().GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                Type curType = stack.Pop();
+                var fields = curType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+                foreach(var field in fields){
+                    if(!field.IsPublic && field.GetCustomAttribute<SerializeField>(true) == null) continue;
+                    if(field.GetCustomAttribute<HideInInspector>(true) != null) continue;
+                    if(field.GetCustomAttribute<NonSerializedAttribute>(true) != null) continue;
+                    string name = PCEditorUtility.ToInspectorName(field.Name);
+                    
+                    
+                    if(field.FieldType == typeof(int)){
+                        IntegerField intField = new IntegerField(){
+                            label = name
+                        };
+                        SetField(intField, field, obj);
                     }
-                    else SetField(textField, field, obj);
-                }
-                else if(field.FieldType.IsEnum){
-                    EnumField enumField = new EnumField((System.Enum) field.GetValue(nodeView.node)){
-                        label = field.Name
-                    };               
-                    SetField(enumField, field, obj);
-                }
-                else if(field.FieldType == typeof(Vector2)){
-                    Vector2Field vector2Field = new Vector2Field(){
-                        label = field.Name
-                    };
-                    SetField(vector2Field, field, obj);
-                }
-                else if(field.FieldType == typeof(Vector3)){
-                    Vector3Field vector3Field = new Vector3Field(){
-                        label = field.Name
-                    };
-                    SetField(vector3Field, field, obj);
+                    else if(field.FieldType == typeof(float)){
+                        FloatField floatField = new FloatField(){
+                            label = name
+                        };
+                        SetField(floatField, field, obj);
+                    }
+                    else if(field.FieldType == typeof(bool)){
+                        Toggle toggle = new Toggle(){
+                            label = name
+                        };
+                        SetField(toggle, field, obj);
+                    }
+                    else if(field.FieldType == typeof(string)){
+                        TextField textField = new TextField(){
+                            label = name
+                        };
+                        textField.isDelayed = true;
+                        if(!foundName && field.Name.Equals("_actionName")){
+                            textField.value = (string) field.GetValue(nodeView.node);
+                            textField.RegisterValueChangedCallback(callback => {
+                                textField.SetValueWithoutNotify(callback.previousValue);
+                                if(!Application.isPlaying){
+                                    string newName = nodeView.OnNodeNameChanged(callback.previousValue, callback.newValue);
+                                    textField.SetValueWithoutNotify(newName);
+                                    listView.Rebuild();
+                                }
+                            });
+                            scrollView.Add(textField);
+                            foundName = true;
+                        }
+                        else SetField(textField, field, obj);
+                    }
+                    else if(field.FieldType.IsEnum){
+                        EnumField enumField = new EnumField((System.Enum) field.GetValue(nodeView.node)){
+                            label = name
+                        };               
+                        SetField(enumField, field, obj);
+                    }
+                    else if(field.FieldType == typeof(Vector2)){
+                        Vector2Field vector2Field = new Vector2Field(){
+                            label = name
+                        };
+                        SetField(vector2Field, field, obj);
+                    }
+                    else if(field.FieldType == typeof(Vector3)){
+                        Vector3Field vector3Field = new Vector3Field(){
+                            label = name
+                        };
+                        SetField(vector3Field, field, obj);
+                    }
                 }
             }
         }
@@ -113,20 +128,32 @@ public class InspectorView : VisualElement
         SetListView();
     }
     private void SetField<T>(BaseField<T> field, FieldInfo fieldInfo, SerializedObject obj){
-        if(!Application.isPlaying){
+        //if(!Application.isPlaying){
             field.BindProperty(obj.FindProperty(fieldInfo.Name));
-        }
-        else{
-            field.RegisterValueChangedCallback(callback => {
-                fieldInfo.SetValue(focused.node, callback.newValue);
-            });
-        }
+        //}
+        // else{
+        //     field.RegisterValueChangedCallback(callback => {
+        //         fieldInfo.SetValue(focused.node, callback.newValue);
+        //     });
+        // }
         scrollView.Add(field);
     }
+    public void ClearInspector(){
+        listView.itemsSource = null;
+        listView.Rebuild();
+        listView.ClearSelection();
+        scrollView.Clear();
+        if(focused != null){
+            focused.onDeleted -= OnNodeDeleted;
+            focused = null;
+        }
+        selected = null;
+    }
     private void SetListView(){
+        listView.Clear();
         listView.itemsSource = focused.outputPort.connections.ToList();
         listView.Rebuild();
-        focused.updated = false;
+        listView.ClearSelection();
     }
     private void OnItemIndexChanged(int oldVal, int newVal){
         focused.MoveTransitionIndex(oldVal, newVal);
@@ -150,18 +177,15 @@ public class InspectorView : VisualElement
             }
         }
     }
-    public void Update(){
-        if(listView != null && focused != null && focused.updated){          
-            SetListView();
-        }
-        if(focused != null && focused.deleted){
-            listView.itemsSource = null;
-            listView.Rebuild();
-            scrollView.Clear();
-            focused = null;
-            selected = null;
-        }
+    private void OnNodeDeleted(){
+        ClearInspector();
     }
+
+    public void OnDestroy(){
+        Undo.undoRedoPerformed -= UndoRedoPerformed;
+        listView.UnregisterCallback<KeyDownEvent>(OnKeyDown);
+    }
+    
 
     private void AddSelection(PCEdgeView edge){
         graphView.AddToSelection(edge);
@@ -176,6 +200,13 @@ public class InspectorView : VisualElement
 
     private void RemoveSelection(PCEdgeView edge){
         graphView.RemoveFromSelection(edge);
+    }
+
+    public void Update(){
+        if(focused != null && focused.updated){
+            focused.updated = false;
+            SetListView();
+        }
     }
 }
 }

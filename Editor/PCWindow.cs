@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEditor.Experimental.GraphView;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 
 
 namespace PlayerController.Editor{
@@ -17,6 +18,7 @@ public class PCWindow : EditorWindow
     [SerializeField]
     private StyleSheet styleSheet = default;
     private PCGraphView graphView;
+    private ParameterView parameterView;
     private InspectorView nodeInspector;
     private TransitionInspector edgeInspector;
     private VisualElement overlay;
@@ -26,6 +28,7 @@ public class PCWindow : EditorWindow
     public int instanceID;
     //public string guid;
     public string path = null;
+    private bool isPlaying = false;
 
 #region Initialize
     public static PCWindow Open(string title, int instanceID){
@@ -69,18 +72,25 @@ public class PCWindow : EditorWindow
         graphView.onNodeSelected = OnNodeSelected;
         graphView.onEdgeSelected = OnEdgeSelected;
 
-        scrollView = root.Q<ScrollView>();
-        listView = root.Q<ListView>();
+        parameterView = root.Q<ParameterView>();
+
+        scrollView = root.Q<ScrollView>("NodeInfo");
+        listView = root.Q<ListView>("TransitionList");
         edgeInspector = root.Q<TransitionInspector>();
         nodeInspector = root.Q<InspectorView>();
         nodeInspector.Init(listView, scrollView, graphView);
         overlay = root.Q<VisualElement>("Overlay");
         pingAsset = root.Q<Button>();
-        pingAsset.clicked += () => EditorGUIUtility.PingObject(instanceID);
+       
 
         //string path = EditorPrefs.GetString(guid);
         PlayerControllerAsset entry = AssetDatabase.LoadAssetAtPath<PlayerControllerAsset>(path);
-        if(entry != null) LoadGraphView(entry);
+        if(entry != null) {
+             pingAsset.clicked += () => EditorGUIUtility.PingObject(entry);
+            LoadGraphView(entry);
+            parameterView.Init(entry);
+            edgeInspector.Init(parameterView);
+        }
         else{
             overlay.style.visibility = Visibility.Visible;
         }
@@ -98,36 +108,72 @@ public class PCWindow : EditorWindow
 
 #region Callbacks
     public void OnSelectionChange() {
-        if(EditorUtility.InstanceIDToObject(instanceID) == null) {
+        var asset = AssetDatabase.LoadAssetAtPath<PlayerControllerAsset>(path);
+        if(asset == null) {
             graphView?.ClearGraph();
             overlay.style.visibility = Visibility.Visible;
+        }
+        if(Application.isPlaying){
+            if(Selection.activeGameObject){
+                PlayerControl controller = Selection.activeGameObject.GetComponent<PlayerControl>();
+                if(controller != null && controller.playerControllerAsset != null && controller.playerControllerAsset.guid.Equals(asset.guid)) {
+                    graphView?.LoadGraph(controller.playerControllerAsset);
+                    nodeInspector?.ClearInspector();
+                    parameterView?.ChangeAsset(controller.playerControllerAsset);
+                    edgeInspector?.ChangeParameterView(parameterView);
+                    isPlaying = true;
+                }
+            }
         }
     }
 
     public void OnDestroy() {
         //EditorPrefs.DeleteKey(guid);
         openedWnd.Remove(path);
+        graphView.OnDestroy();
+        nodeInspector.OnDestroy();
+        parameterView.OnDestroy();
     }
 
     public void OnEnable() {
         if(path != null && !openedWnd.ContainsKey(path)){
             openedWnd.Add(path, this);
-        }        
+        }    
+        isPlaying = false;    
+        EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
+        EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
     }
 
     public void OnInspectorUpdate() {
-        UpdateInspector();
+        if(isPlaying){
+            graphView?.UpdateState();
+        }
+        nodeInspector.Update();
+        edgeInspector.Update();
     }
-
+    
+    public void OnPlayModeStateChanged(PlayModeStateChange chg){
+        switch(chg){
+            case PlayModeStateChange.EnteredEditMode:
+            isPlaying = false;
+            var asset = AssetDatabase.LoadAssetAtPath<PlayerControllerAsset>(path);
+            if(asset != null){
+                graphView?.LoadGraph(asset);
+                nodeInspector?.ClearInspector();
+                parameterView?.ChangeAsset(asset);
+                edgeInspector?.ChangeParameterView(parameterView);
+            }
+            break;
+            // case PlayModeStateChange.EnteredPlayMode:
+            // isPlaying = true;
+            // break;
+        }
+    }
     public void OnNodeSelected(PCNodeView nodeView){
         nodeInspector?.UpdateInspector(nodeView);
     }
     public void OnEdgeSelected(PCEdgeView edge){
         edgeInspector?.UpdateInspector(edge);
-    }
-    public void UpdateInspector(){
-        nodeInspector.Update();
-        edgeInspector.Update();
     }
 #endregion Callbacks
 }
