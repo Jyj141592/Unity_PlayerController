@@ -115,7 +115,7 @@ public class PCWindow : EditorWindow
         }
         if(Application.isPlaying){
             if(Selection.activeGameObject){
-                PlayerController controller = Selection.activeGameObject.GetComponent<PlayerController>();
+                PlayerControl controller = Selection.activeGameObject.GetComponent<PlayerControl>();
                 if(controller != null && controller.playerControllerAsset != null && controller.playerControllerAsset.guid.Equals(asset.guid)) {
                     graphView?.LoadGraph(controller.playerControllerAsset);
                     nodeInspector?.ClearInspector();

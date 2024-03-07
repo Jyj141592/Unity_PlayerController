@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 namespace PlayerController{
-public class PlayerController : MonoBehaviour
+public class PlayerControl : MonoBehaviour
 {
     public PlayerControllerAsset playerControllerAsset;
 
@@ -53,6 +53,9 @@ public class PlayerController : MonoBehaviour
     }
     public bool GetBool(int index){
         return playerControllerAsset.parameterList.GetBool(index);
+    }
+    public bool SetTransitionMute(string nodeName, int transitionIndex, bool value){
+        return playerControllerAsset.SetTransitionMute(nodeName, transitionIndex, value);
     }
 }
 }

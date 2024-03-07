@@ -94,6 +94,14 @@ public class PlayerControllerAsset : PCNode
         else if(index >= nodes.Count) return null;
         return _nodes[index];
     }
+
+    public bool SetTransitionMute(string nodeName, int transitionIndex, bool value){
+        PCNode node = FindNodeByName(nodeName);
+        if(node == null) return false;
+        if(node.transitions.Count >= transitionIndex) return false;
+        node.transitions[transitionIndex].mute = value;
+        return true;
+    }
     public PlayerControllerAsset CloneAsset(){
         PlayerControllerAsset asset = Instantiate(this);
         asset._anyState = Instantiate(anyState);
