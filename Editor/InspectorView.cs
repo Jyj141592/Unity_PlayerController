@@ -55,7 +55,6 @@ public class InspectorView : VisualElement
                 type = type.BaseType;
             }
             while(stack.Count > 0){
-                //var members = nodeView.node.GetType().GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
                 Type curType = stack.Pop();
                 var fields = curType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
                 foreach(var field in fields){
@@ -128,14 +127,7 @@ public class InspectorView : VisualElement
         SetListView();
     }
     private void SetField<T>(BaseField<T> field, FieldInfo fieldInfo, SerializedObject obj){
-        //if(!Application.isPlaying){
-            field.BindProperty(obj.FindProperty(fieldInfo.Name));
-        //}
-        // else{
-        //     field.RegisterValueChangedCallback(callback => {
-        //         fieldInfo.SetValue(focused.node, callback.newValue);
-        //     });
-        // }
+        field.BindProperty(obj.FindProperty(fieldInfo.Name));
         scrollView.Add(field);
     }
     public void ClearInspector(){

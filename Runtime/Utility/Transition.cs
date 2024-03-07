@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace PlayerController{
 [Serializable]
-public class Transition// : ScriptableObject
+public class Transition
 {
     [SerializeField]
     private PCNode _dest;

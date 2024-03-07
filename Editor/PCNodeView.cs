@@ -87,7 +87,6 @@ public class PCNodeView : Node
         Undo.RecordObject(node, "Set Position");
         obj.FindProperty("_position").vector2Value = newPos.position;
         obj.ApplyModifiedProperties();
-        //node.position = newPos.position;
     }
 
     public void MoveTransitionIndex(int from, int to){
@@ -152,11 +151,9 @@ public class PCNodeView : Node
         if(nodeTitle.text.Equals(newVal)) return newVal;
         Undo.RecordObject(node, "Rename Node");
         string newName = onNodeNameChanged.Invoke(oldVal, newVal);
-        //nodeTitle.text = newName;
         obj.FindProperty("_actionName").stringValue = newName;
         obj.FindProperty("_actionID").intValue = Animator.StringToHash(newName);
         obj.ApplyModifiedProperties();
-        //node.actionName = newName;
 
         if(!Application.isPlaying){
             AssetDatabase.SaveAssets();

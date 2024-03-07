@@ -22,7 +22,6 @@ public class PCGraphView : GraphView
 #region Initialize
     public PCGraphView(){
         CreateGridBackground();
-        //AddStyleSheet("Assets/PlayerController/Editor/PCWindow.uss");
         AddManipulators();
         nodeViews = new Dictionary<string, PCNodeView>();
         nodeNames = new HashSet<string>();
@@ -166,23 +165,15 @@ public class PCGraphView : GraphView
         
         SerializedObject obj = new SerializedObject(output.node);
         
-        //output.node.transition.Add(transition);
-
         SerializedProperty property = obj.FindProperty("_transitions");
         int pos = output.node.transitions.Count;
         property.InsertArrayElementAtIndex(pos);
         property.GetArrayElementAtIndex(pos).boxedValue = new Transition();
         property.GetArrayElementAtIndex(pos).FindPropertyRelative("_dest").objectReferenceValue = input.node;
-        //property.GetArrayElementAtIndex(pos).FindPropertyRelative("_conditions").ClearArray();
 
         obj.ApplyModifiedProperties();
-        //SerializedProperty property = obj.FindProperty("_transitions");
-        //property.GetEndProperty().
-        
-        if(!Application.isPlaying){
-            //AssetDatabase.AddObjectToAsset(transition, output.node);
-            //Undo.RegisterCreatedObjectUndo(transition, "Create Transition");
 
+        if(!Application.isPlaying){
             AssetDatabase.SaveAssets();
         }
         return output.node.transitions[pos];
@@ -213,7 +204,6 @@ public class PCGraphView : GraphView
         nodeNames.Remove(nodeView.node.actionName);
         nodeView.onDeleted?.Invoke();
         if(!Application.isPlaying){
-            //AssetDatabase.RemoveObjectFromAsset(nodeView.node);
             Undo.DestroyObjectImmediate(nodeView.node);
 
             AssetDatabase.SaveAssets();
@@ -236,15 +226,11 @@ public class PCGraphView : GraphView
         nodeView.OnDeleteEdge(edge.transitionIndex);
         edge.onDeleted?.Invoke();
         if(!Application.isPlaying){
-           // Undo.DestroyObjectImmediate(edge.transition);
             AssetDatabase.SaveAssets();
         }
     }
     private void DisconnectAll(PCNodeView nodeView, List<GraphElement> deleteElements){
         if(nodeView.inputPort != null && nodeView.inputPort.connected){
-            // foreach(Edge edge in nodeView.inputPort.connections){
-            //     DeleteEdge(edge as PCEdgeView);
-            // }
             while(nodeView.inputPort.connections.Count() > 0){
                 PCEdgeView e = nodeView.inputPort.connections.First() as PCEdgeView;
                 DeleteEdge(e);
@@ -252,9 +238,6 @@ public class PCGraphView : GraphView
             }
         }
         if(nodeView.outputPort != null && nodeView.outputPort.connected){
-            // foreach(Edge edge in nodeView.outputPort.connections){
-            //     DeleteEdge(edge as PCEdgeView);
-            // }
             while(nodeView.outputPort.connections.Count() > 0){
                 PCEdgeView e = nodeView.outputPort.connections.First() as PCEdgeView;
                 DeleteEdge(e);
@@ -306,11 +289,7 @@ public class PCGraphView : GraphView
 
 #region Utility
     public override void BuildContextualMenu(ContextualMenuPopulateEvent evt) {
-        //base.BuildContextualMenu(evt);
-        // if(evt.target is PCNodeView node){
-        //     evt.menu.AppendAction("Make Transition",callback => {});
-            
-        // }
+
         if(Application.isPlaying) return;
         Vector2 nodePosition = this.ChangeCoordinatesTo(contentViewContainer, evt.localMousePosition);
         evt.menu.AppendAction("Add Subgraph node", callback => {

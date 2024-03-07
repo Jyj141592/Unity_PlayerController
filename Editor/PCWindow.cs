@@ -26,7 +26,6 @@ public class PCWindow : EditorWindow
     private ScrollView scrollView;
     private ListView listView;
     public int instanceID;
-    //public string guid;
     public string path = null;
     private bool isPlaying = false;
 
@@ -42,11 +41,9 @@ public class PCWindow : EditorWindow
         }
         wnd = CreateInstance<PCWindow>();
         wnd.titleContent = new GUIContent(title);
-        //wnd.guid = GUID.Generate().ToString();
         wnd.instanceID = instanceID;
         wnd.path = path;
         openedWnd.Add(path, wnd);
-        //EditorPrefs.SetString(wnd.guid, path);
         wnd.Show();
         wnd.SetPositionToRoot();
         return wnd;
@@ -82,8 +79,6 @@ public class PCWindow : EditorWindow
         overlay = root.Q<VisualElement>("Overlay");
         pingAsset = root.Q<Button>();
        
-
-        //string path = EditorPrefs.GetString(guid);
         PlayerControllerAsset entry = AssetDatabase.LoadAssetAtPath<PlayerControllerAsset>(path);
         if(entry != null) {
              pingAsset.clicked += () => EditorGUIUtility.PingObject(entry);
@@ -128,7 +123,6 @@ public class PCWindow : EditorWindow
     }
 
     public void OnDestroy() {
-        //EditorPrefs.DeleteKey(guid);
         openedWnd.Remove(path);
         graphView.OnDestroy();
         nodeInspector.OnDestroy();
@@ -164,9 +158,6 @@ public class PCWindow : EditorWindow
                 edgeInspector?.ChangeParameterView(parameterView);
             }
             break;
-            // case PlayModeStateChange.EnteredPlayMode:
-            // isPlaying = true;
-            // break;
         }
     }
     public void OnNodeSelected(PCNodeView nodeView){

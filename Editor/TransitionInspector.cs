@@ -183,11 +183,6 @@ public class TransitionInspector : VisualElement
         //if(!Application.isPlaying){
             field.BindProperty(property.FindPropertyRelative(fieldInfo.Name));
         //}
-        // else{
-        //     field.RegisterValueChangedCallback(callback => {
-        //         fieldInfo.SetValue(edge.transition, callback.newValue);
-        //     });
-        // }
         foldout.Add(field);
     }
 
@@ -288,7 +283,6 @@ public class TransitionInspector : VisualElement
             d.choices.Add("false");
             SerializedObject obj = new SerializedObject(node);
             TransitionCondition c = node.transitions[edgeIdx].conditions[index].condition;
-            //TransitionCondition c = obj.FindProperty("_transitions").GetArrayElementAtIndex(edgeIdx).FindPropertyRelative("_conditions").GetArrayElementAtIndex(index).FindPropertyRelative("_condition").GetEnumValue<TransitionCondition>();
             if(c == TransitionCondition.Bool_False){
                 d.SetValueWithoutNotify("false");
             }
@@ -296,7 +290,6 @@ public class TransitionInspector : VisualElement
                 d.SetValueWithoutNotify("true");
             }
             else{
-                //SerializedObject obj = new SerializedObject(node);
                 SerializedProperty p = obj.FindProperty("_transitions").GetArrayElementAtIndex(edgeIdx).FindPropertyRelative("_conditions").GetArrayElementAtIndex(index);
                 p.FindPropertyRelative("_condition").SetEnumValue(TransitionCondition.Bool_True);
                 p.FindPropertyRelative("value").floatValue = 0;

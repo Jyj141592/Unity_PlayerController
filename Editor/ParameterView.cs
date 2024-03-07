@@ -33,10 +33,6 @@ public class ParameterView : VisualElement
         names = new Dictionary<string, int>();
     }
     private void UndoRedoPerformed(){
-        // PCEditorUtility.InvokeFunctionWithDelay(() => {
-        //     if(!Application.isPlaying) AssetDatabase.SaveAssets();
-        //     LoadParameterView(); 
-        // }, 0.01);       
         if(!Application.isPlaying) AssetDatabase.SaveAssets();
             LoadParameterView(searchOption, searchName); 
     }
@@ -162,7 +158,6 @@ public class ParameterView : VisualElement
     public void BindItem(VisualElement e, int j){
             int i = names[(listView.itemsSource[j] as Parameter).name];
             Label label = e.Q<Label>();
-            //label.text = parameterList.parameters[i].GetName();
             SerializedObject obj = new SerializedObject(asset);
             SerializedProperty property = obj.FindProperty("_parameterList").FindPropertyRelative("_parameters").GetArrayElementAtIndex(i);
             label.BindProperty(property.FindPropertyRelative("_name"));
@@ -205,7 +200,6 @@ public class ParameterView : VisualElement
                 });
                 intField.style.flexDirection = FlexDirection.Column;
                 intField.style.minWidth = 35;
-                //intField.style.maxWidth = 45;
                 
                 floatField.RegisterValueChangedCallback((callback) => {
                     intField.SetValueWithoutNotify((int) callback.newValue);

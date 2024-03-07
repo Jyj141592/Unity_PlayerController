@@ -5,7 +5,6 @@ using Unity.VisualScripting;
 using UnityEngine;
 
 namespace PlayerController{
-//[CreateAssetMenu(fileName = "New Parameter List", menuName = "PlayerController/Parameter List")]
 [Serializable]
 public class ParameterList
 {
