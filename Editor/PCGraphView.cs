@@ -55,6 +55,7 @@ public class PCGraphView : GraphView
     }
 
     public void OnDestroy() {
+        ClearGraph();
         Undo.undoRedoPerformed -= UndoRedoPerformed;
     }
 

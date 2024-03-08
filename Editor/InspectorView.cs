@@ -25,7 +25,9 @@ public class InspectorView : VisualElement
         this.graphView = graphView;
         
         listView.RegisterCallback<KeyDownEvent>(OnKeyDown, TrickleDown.TrickleDown);
+        listView.itemIndexChanged -= OnItemIndexChanged;
         listView.itemIndexChanged += OnItemIndexChanged;
+        listView.selectionChanged -= OnSelectionChanged;
         listView.selectionChanged += OnSelectionChanged;
         Undo.undoRedoPerformed += UndoRedoPerformed;
         

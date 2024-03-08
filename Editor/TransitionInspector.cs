@@ -234,6 +234,7 @@ public class TransitionInspector : VisualElement
     }
     public void OnDestroy(){
         Undo.undoRedoPerformed -= OnUndoRedoPerformed;
+        listView.UnregisterCallback<KeyDownEvent>(OnKeyDown);
     }
 
     private void OnKeyDown(KeyDownEvent ev){

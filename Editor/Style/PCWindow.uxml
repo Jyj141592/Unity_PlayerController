@@ -15,7 +15,10 @@
                     </PlayerController.Editor.ParameterView>
                 </ui:VisualElement>
                 <ui:VisualElement style="flex-grow: 1;">
-                    <ui:Label tabindex="-1" text="GraphView" parse-escape-sequences="true" display-tooltip-when-elided="true" />
+                    <ui:VisualElement style="flex-grow: 1; min-height: 14px; max-height: 14px; flex-direction: row;">
+                        <ui:Label tabindex="-1" text="GraphView" parse-escape-sequences="true" display-tooltip-when-elided="true" style="flex-grow: 1;" />
+                        <ui:Button text="Refresh" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Refresh" />
+                    </ui:VisualElement>
                     <PlayerController.Editor.PCGraphView focusable="true" name="PCGraphView" style="flex-grow: 1; flex-shrink: 1; left: 0; flex-direction: column; align-items: stretch; justify-content: flex-start; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; position: relative; height: auto; width: auto; align-self: auto; top: 0; right: 0; bottom: 0;" />
                 </ui:VisualElement>
             </PlayerController.Editor.SplitView>

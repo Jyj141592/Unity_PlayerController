@@ -22,6 +22,7 @@ public class PCWindow : EditorWindow
     private Button pingAsset;
     private ScrollView scrollView;
     private ListView listView;
+    private Button refresh;
     public int instanceID;
     public string path = null;
     private bool isPlaying = false;
@@ -74,11 +75,20 @@ public class PCWindow : EditorWindow
         nodeInspector = root.Q<InspectorView>();
         nodeInspector.Init(listView, scrollView, graphView);
         overlay = root.Q<VisualElement>("Overlay");
-        pingAsset = root.Q<Button>();
+        pingAsset = root.Q<Button>("PingAsset");
+        refresh = root.Q<Button>("Refresh");
        
         PlayerControllerAsset entry = AssetDatabase.LoadAssetAtPath<PlayerControllerAsset>(path);
         if(entry != null) {
-             pingAsset.clicked += () => EditorGUIUtility.PingObject(entry);
+            pingAsset.clicked += () => EditorGUIUtility.PingObject(entry);
+            refresh.clicked += () => {
+                graphView.OnDestroy();
+                nodeInspector.OnDestroy();
+                edgeInspector.OnDestroy();
+                parameterView.OnDestroy();
+                root.Clear();
+                CreateGUI();
+            };
             LoadGraphView(entry);
             parameterView.Init(entry);
             edgeInspector.Init(parameterView);
@@ -123,6 +133,7 @@ public class PCWindow : EditorWindow
         openedWnd.Remove(path);
         graphView.OnDestroy();
         nodeInspector.OnDestroy();
+        edgeInspector.OnDestroy();
         parameterView.OnDestroy();
     }
 
