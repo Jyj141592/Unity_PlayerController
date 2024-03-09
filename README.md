@@ -46,33 +46,33 @@ public class CustomNode : PCNode{
   
 2. 에디터 조작
 
-  - 대부분의 조작법은 애니메이터와 비슷함
+- 대부분의 조작법은 애니메이터와 비슷함
   
-  1) 노드 생성
+  - 1. 노드 생성
 
     - 빈 공간에 우클릭 -> New node -> 생성할 노드 선택
 
-  2) 노드 연결
+  - 2. 노드 연결
 
     - 노드의 위쪽이 입력 포트, 아래쪽이 출력 포트
 
     - 출력 포트 -> 입력 포트 방향으로 트랜지션이 생성됨
 
-  3) 파라미터 생성, 편집
+  - 3. 파라미터 생성, 편집
 
     - 좌측 + 버튼을 눌러 파라미터 생성(int, float, bool 타입 지원)
 
     - 파라미터 이름을 더블클릭해 이름을 바꿀 수 있음
 
-  4) 노드 데이터 수정
+  - 4. 노드 데이터 수정
 
     - 노드를 선택하면 우측에 노드의 public 또는 SerializeField 변수들을 편집할 수 있음
 
-  5) 트랜지션 데이터 수정
+  - 5. 트랜지션 데이터 수정
 
     - 엣지를 선택하면 해당 트랜지션을 편집할 수 있음
 
-  6) Ping Asset, Refresh 버튼
+  - 6. Ping Asset, Refresh 버튼
 
     - Ping Asset 버튼을 클릭하면 현재 편집 중인 에셋의 위치가 프로젝트 창에서 표시됨
 
@@ -124,6 +124,6 @@ public class CustomNode : PCNode{
 
 <img width="791" alt="스크린샷 2024-03-09 143018" src="https://github.com/Jyj141592/Unity_PlayerController/assets/140074412/569f7ab5-7769-4c5b-b942-8b01b43e546d">
 
-# 오류
+# 확인된 오류
 
   - condition을 추가할 때 가끔씩 추가한 condition이 보이지 않을 때가 있음. 상단의 refresh 버튼을 누르면 해결
