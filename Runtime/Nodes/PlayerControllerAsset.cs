@@ -39,20 +39,14 @@ public class PlayerControllerAsset : PCNode
     }
 
     public void Run(){
-        bool check = true;
-        if(check){
-            Transition transition = anyState.CheckTransitions(parameterList);
+        Transition transition = anyState.CheckTransitions(parameterList);
+        if(transition != null){
+            ChangeState(transition);
+        }
+        else{
+            transition = runningNode.CheckTransitions(parameterList);
             if(transition != null){
                 ChangeState(transition);
-            }
-            else{
-                transition = runningNode.CheckTransitions(parameterList);
-                if(transition != null){
-                    ChangeState(transition);
-                }
-                else{
-                    check = false;
-                }
             }
         }
         runningNode.OnUpdate();
